@@ -252,12 +252,14 @@ Route::middleware(['auth', 'role:technician'])->group(function () {
 
 // In routes/web.php (for testing only)
 
-Route::get('/test-email', function () {
+if (app()->environment('local')) {
+    Route::middleware(['auth', 'role:admin'])->get('/test-email', function () {
 
-    Mail::raw('Ini email test daripada Laravel + Brevo', function ($message) {
-        $message->to('zamriyahya03@gmail.com')
-                ->subject('Test Email');
+        Mail::raw('Ini email test daripada Laravel + Brevo', function ($message) {
+            $message->to('zamriyahya03@gmail.com')
+                    ->subject('Test Email');
+        });
+
+        return 'Email berjaya dihantar!';
     });
-
-    return 'Email berjaya dihantar!';
-});
+}

@@ -6,6 +6,7 @@ use App\Mail\BookingTimelineUpdatedMail;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Throwable;
 
 class BookingTimeline extends Model
 {
@@ -67,12 +68,24 @@ class BookingTimeline extends Model
         }
 
         foreach ($recipients as $recipient) {
-            try {
-                Mail::to($recipient['email'])
-                    ->queue(new BookingTimelineUpdatedMail($timeline, $recipient['role']));
-            } catch (\Exception $e) {
-                Log::error('Booking timeline email notification failed for ' . $recipient['email'] . ': ' . $e->getMessage());
-            }
+            self::sendTimelineEmailAfterResponse($timeline->id, $recipient['email'], $recipient['role']);
         }
+    }
+
+    protected static function sendTimelineEmailAfterResponse(int $timelineId, string $email, string $role): void
+    {
+        dispatch(function () use ($timelineId, $email, $role) {
+            try {
+                $timeline = self::with(['booking.customer', 'booking.technician'])->find($timelineId);
+
+                if (! $timeline) {
+                    return;
+                }
+
+                Mail::to($email)->send(new BookingTimelineUpdatedMail($timeline, $role));
+            } catch (Throwable $e) {
+                Log::error('Booking timeline email notification failed for ' . $email . ': ' . $e->getMessage());
+            }
+        })->afterResponse();
     }
 }

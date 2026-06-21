@@ -7,8 +7,10 @@ use App\Mail\CustomerApprovedMail;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Throwable;
 
 class CustomerApprovalController extends Controller
 {
@@ -65,7 +67,7 @@ class CustomerApprovalController extends Controller
         ]);
 
         if ($request->approval_status === 'approved' && $oldStatus !== 'approved' && !empty($user->email)) {
-            Mail::to($user->email)->send(new CustomerApprovedMail($user));
+            $this->sendApprovalMailAfterResponse($user);
         }
 
         return back()->with('success', 'Customer account updated successfully.');
@@ -85,7 +87,7 @@ class CustomerApprovalController extends Controller
         ]);
 
         if (!empty($user->email)) {
-            Mail::to($user->email)->send(new CustomerApprovedMail($user));
+            $this->sendApprovalMailAfterResponse($user);
         }
 
         return back()->with('success', 'Customer approved successfully.');
@@ -98,5 +100,25 @@ class CustomerApprovalController extends Controller
         ]);
 
         return back()->with('delete', 'Customer rejected.');
+    }
+
+    private function sendApprovalMailAfterResponse(User $user): void
+    {
+        $userId = $user->id;
+        $email = $user->email;
+
+        dispatch(function () use ($userId, $email) {
+            try {
+                $freshUser = User::find($userId);
+
+                if (! $freshUser || empty($email)) {
+                    return;
+                }
+
+                Mail::to($email)->send(new CustomerApprovedMail($freshUser));
+            } catch (Throwable $e) {
+                Log::error('Customer approval email failed for ' . $email . ': ' . $e->getMessage());
+            }
+        })->afterResponse();
     }
 }
