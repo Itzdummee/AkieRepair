@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>Repair Payment | AkieRepair</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Mukta+Mahee:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -17,7 +18,7 @@
         }
 
         .customer-wrapper{
-            display:flex;
+            display:block;
             min-height:100vh;
         }
 
@@ -179,8 +180,8 @@
         }
 
         .customer-main{
-            margin-left:270px;
-            width:calc(100% - 270px);
+            margin-left:0;
+            width:100%;
             padding:35px;
             box-sizing:border-box;
         }
@@ -340,6 +341,155 @@
             }
             .action-buttons {
                 flex-direction: column;
+            }
+        }
+
+        @media (max-width: 560px) {
+            .customer-main {
+                padding: 16px;
+            }
+
+            .payment-card {
+                border-radius: 0.85rem;
+            }
+
+            .card-header {
+                padding: 1rem;
+            }
+
+            .card-header h1 {
+                font-size: 1.25rem;
+            }
+
+            .card-body {
+                padding: 1.25rem 1rem;
+            }
+
+            .summary-row {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 0.25rem;
+            }
+
+            .total-amount {
+                font-size: 1.3rem;
+            }
+
+            .info-banner {
+                flex-direction: column;
+            }
+        }
+
+        :root {
+            --ui-bg: #f4f6f9;
+            --ui-text: #0f172a;
+            --ui-muted: #64748b;
+            --ui-line: #e2e8f0;
+            --ui-soft: #f8fafc;
+            --ui-accent: #16a34a;
+            --ui-blue: #2563eb;
+        }
+
+        body {
+            background: var(--ui-bg);
+            color: var(--ui-text);
+            text-rendering: optimizeLegibility;
+        }
+
+        .customer-main {
+            padding: clamp(18px, 4vw, 42px);
+        }
+
+        .payment-container {
+            max-width: min(760px, 100%);
+        }
+
+        .payment-card {
+            border: 1px solid var(--ui-line);
+            border-radius: 18px;
+            box-shadow: 0 18px 48px rgba(15, 23, 42, .08);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #0f172a, #2563eb);
+            padding: clamp(1.15rem, 3vw, 1.65rem);
+        }
+
+        .card-header h1 {
+            font-family: 'Mukta Mahee', system-ui, sans-serif;
+            font-size: clamp(1.35rem, 3vw, 1.7rem);
+            letter-spacing: 0;
+            line-height: 1.15;
+        }
+
+        .card-body {
+            padding: clamp(1.25rem, 4vw, 2.25rem);
+        }
+
+        .section-title {
+            color: var(--ui-text);
+            font-size: 1.05rem;
+            letter-spacing: 0;
+        }
+
+        .detail-label {
+            color: var(--ui-muted);
+        }
+
+        .detail-value,
+        .total-label {
+            color: var(--ui-text);
+        }
+
+        .total-amount {
+            color: var(--ui-blue);
+            font-size: clamp(1.35rem, 4vw, 1.75rem);
+        }
+
+        .info-banner {
+            background: #eff6ff;
+            border-color: #bfdbfe;
+            border-radius: 12px;
+        }
+
+        .btn-cancel,
+        .btn-pay {
+            border-radius: 10px;
+            font-family: 'Mukta Mahee', system-ui, sans-serif;
+            font-weight: 700;
+            min-height: 46px;
+            transition: transform .16s ease, box-shadow .16s ease, background-color .16s ease, border-color .16s ease;
+        }
+
+        .btn-cancel:hover,
+        .btn-pay:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-pay {
+            background: var(--ui-blue);
+            box-shadow: 0 12px 24px rgba(37, 99, 235, .18);
+        }
+
+        .btn-pay:hover {
+            background: #1d4ed8;
+        }
+
+        @media (max-width: 560px) {
+            .customer-main {
+                padding: 14px;
+            }
+
+            .payment-card {
+                border-radius: 16px;
+            }
+
+            .details-grid {
+                gap: .85rem;
+            }
+
+            .summary-row {
+                align-items: stretch;
             }
         }
     </style>

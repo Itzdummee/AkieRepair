@@ -15,6 +15,12 @@ class TechnicianDeleteTest extends TestCase
 
     public function test_technician_cannot_be_deleted_when_assigned_to_booking(): void
     {
+        $admin = User::factory()->create([
+            'id' => 'A001',
+            'role' => 'admin',
+            'approval_status' => 'approved',
+        ]);
+
         $technician = User::factory()->create([
             'id' => 'T001',
             'role' => 'technician',
@@ -42,7 +48,8 @@ class TechnicianDeleteTest extends TestCase
             'status' => 'Visit Requested',
         ]);
 
-        $response = $this->delete(route('admin.technicians.destroy', $technician));
+        $response = $this->actingAs($admin)
+            ->delete(route('admin.technicians.destroy', $technician));
 
         $response->assertSessionHasErrors('delete');
         $this->assertDatabaseHas('users', ['id' => $technician->id]);
@@ -50,6 +57,12 @@ class TechnicianDeleteTest extends TestCase
 
     public function test_technician_cannot_be_deleted_when_has_availability_records(): void
     {
+        $admin = User::factory()->create([
+            'id' => 'A001',
+            'role' => 'admin',
+            'approval_status' => 'approved',
+        ]);
+
         $technician = User::factory()->create([
             'id' => 'T002',
             'role' => 'technician',
@@ -61,7 +74,8 @@ class TechnicianDeleteTest extends TestCase
             'reason' => 'Holiday',
         ]);
 
-        $response = $this->delete(route('admin.technicians.destroy', $technician));
+        $response = $this->actingAs($admin)
+            ->delete(route('admin.technicians.destroy', $technician));
 
         $response->assertSessionHasErrors('delete');
         $this->assertDatabaseHas('users', ['id' => $technician->id]);

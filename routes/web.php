@@ -30,13 +30,6 @@ Route::get('/home', function () {
     return redirect()->route('customer.home');
 })->name('home');
 
-Route::get('/services', function () {
-    return view('customer.services');
-})->name('customer.services');
-
-Route::get('/devices', [CustomerDeviceController::class, 'index'])
-    ->name('customer.devices');
-
 /*
 |--------------------------------------------------------------------------
 | AUTH
@@ -73,52 +66,56 @@ Route::post('/logout', [AuthController::class, 'logout'])
 |--------------------------------------------------------------------------
 */
 
-Route::get('/account', [CustomerDashboardController::class, 'account'])->name('customer.account');
-Route::put('/account/profile', [CustomerDashboardController::class, 'updateProfile'])->name('customer.account.update');
-Route::put('/account/password', [CustomerDashboardController::class, 'changePassword'])->name('customer.account.password');
+Route::middleware(['auth', 'role:customer'])->group(function () {
+    Route::get('/account', [CustomerDashboardController::class, 'account'])->name('customer.account');
+    Route::put('/account/profile', [CustomerDashboardController::class, 'updateProfile'])->name('customer.account.update');
+    Route::put('/account/password', [CustomerDashboardController::class, 'changePassword'])->name('customer.account.password');
 
-Route::get('/customer/dashboard', [CustomerDashboardController::class, 'index'])
-    ->name('customer.dashboard');
+    Route::get('/customer/dashboard', [CustomerDashboardController::class, 'index'])
+        ->name('customer.dashboard');
 
-Route::get('/services', [CustomerServiceController::class, 'index'])
-    ->name('customer.services');
+    Route::get('/services', [CustomerServiceController::class, 'index'])
+        ->name('customer.services');
 
+    Route::get('/devices', [CustomerDeviceController::class, 'index'])
+        ->name('customer.devices');
 
-Route::get('/services/{service}/repairs', [CustomerRepairController::class, 'index'])
-    ->name('customer.repairs');
+    Route::get('/services/{service}/repairs', [CustomerRepairController::class, 'index'])
+        ->name('customer.repairs');
 
-Route::get('/repairs', [CustomerRepairController::class, 'all'])
-    ->name('customer.repairs.all');
+    Route::get('/repairs', [CustomerRepairController::class, 'all'])
+        ->name('customer.repairs.all');
 
-Route::get('/customer/booking/create', [CustomerBookingController::class, 'create'])
-    ->name('customer.booking.create');
+    Route::get('/customer/booking/create', [CustomerBookingController::class, 'create'])
+        ->name('customer.booking.create');
 
-Route::post('/customer/booking/store', [CustomerBookingController::class, 'store'])
-    ->name('customer.booking.store');
+    Route::post('/customer/booking/store', [CustomerBookingController::class, 'store'])
+        ->name('customer.booking.store');
 
-Route::get('/customer/booking/status', [CustomerBookingController::class, 'status'])
-    ->name('customer.booking.status');
+    Route::get('/customer/booking/status', [CustomerBookingController::class, 'status'])
+        ->name('customer.booking.status');
 
-Route::get('/customer/booking/history', [CustomerBookingController::class, 'history'])
-    ->name('customer.booking.history');
+    Route::get('/customer/booking/history', [CustomerBookingController::class, 'history'])
+        ->name('customer.booking.history');
 
-Route::get('/customer/booking/{booking}', [CustomerBookingController::class, 'show'])
-    ->name('customer.booking.show');
+    Route::get('/customer/booking/{booking}', [CustomerBookingController::class, 'show'])
+        ->name('customer.booking.show');
 
-Route::put('/customer/bookings/{booking}/accept', [CustomerBookingController::class, 'acceptQuotation'])
-    ->name('customer.booking.accept');
+    Route::put('/customer/bookings/{booking}/accept', [CustomerBookingController::class, 'acceptQuotation'])
+        ->name('customer.booking.accept');
 
-Route::put('/customer/bookings/{booking}/reject', [CustomerBookingController::class, 'rejectQuotation'])
-    ->name('customer.booking.reject');
+    Route::put('/customer/bookings/{booking}/reject', [CustomerBookingController::class, 'rejectQuotation'])
+        ->name('customer.booking.reject');
 
-Route::get('/customer/payment/{booking}', [CustomerPaymentController::class, 'show'])
-    ->name('customer.payment.show');
+    Route::get('/customer/payment/{booking}', [CustomerPaymentController::class, 'show'])
+        ->name('customer.payment.show');
 
-Route::post('/customer/payment/{booking}/initiate', [CustomerPaymentController::class, 'initiate'])
-    ->name('customer.payment.initiate');
+    Route::post('/customer/payment/{booking}/initiate', [CustomerPaymentController::class, 'initiate'])
+        ->name('customer.payment.initiate');
 
-Route::get('/customer/payment/{booking}/callback', [CustomerPaymentController::class, 'callback'])
-    ->name('customer.payment.callback');
+    Route::get('/customer/payment/{booking}/callback', [CustomerPaymentController::class, 'callback'])
+        ->name('customer.payment.callback');
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -126,86 +123,88 @@ Route::get('/customer/payment/{booking}/callback', [CustomerPaymentController::c
 |--------------------------------------------------------------------------
 */
 
-Route::get('/admin/dashboard', [DashboardController::class, 'index'])
-    ->name('admin.dashboard');
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/admin/dashboard', [DashboardController::class, 'index'])
+        ->name('admin.dashboard');
 
-Route::get('/admin/bookings/pending', [BookingController::class, 'pending'])
-    ->name('admin.bookings.pending');
+    Route::get('/admin/bookings/pending', [BookingController::class, 'pending'])
+        ->name('admin.bookings.pending');
 
-Route::get('/admin/bookings/history', [BookingController::class, 'history'])
-    ->name('admin.bookings.history');
+    Route::get('/admin/bookings/history', [BookingController::class, 'history'])
+        ->name('admin.bookings.history');
 
-Route::put('/admin/bookings/{booking}/assign', [BookingController::class, 'assignTechnician'])
-    ->name('admin.bookings.assign');
+    Route::put('/admin/bookings/{booking}/assign', [BookingController::class, 'assignTechnician'])
+        ->name('admin.bookings.assign');
 
-Route::get('/admin/devices', [DeviceController::class, 'index'])
-    ->name('admin.devices');
+    Route::get('/admin/devices', [DeviceController::class, 'index'])
+        ->name('admin.devices');
 
-Route::post('/admin/devices', [DeviceController::class, 'store'])
-    ->name('admin.devices.store');
+    Route::post('/admin/devices', [DeviceController::class, 'store'])
+        ->name('admin.devices.store');
 
-Route::put('/admin/devices/{device}', [DeviceController::class, 'update'])
-    ->name('admin.devices.update');
+    Route::put('/admin/devices/{device}', [DeviceController::class, 'update'])
+        ->name('admin.devices.update');
 
-Route::delete('/admin/devices/{device}', [DeviceController::class, 'destroy'])
-    ->name('admin.devices.destroy');
+    Route::delete('/admin/devices/{device}', [DeviceController::class, 'destroy'])
+        ->name('admin.devices.destroy');
 
-Route::get('/admin/services', [RepairController::class, 'index'])
-    ->name('admin.services');
+    Route::get('/admin/services', [RepairController::class, 'index'])
+        ->name('admin.services');
 
-Route::post('/admin/services', [ServiceController::class, 'store'])
-    ->name('admin.services.store');
+    Route::post('/admin/services', [ServiceController::class, 'store'])
+        ->name('admin.services.store');
 
-Route::put('/admin/services/{service}', [ServiceController::class, 'update'])
-    ->name('admin.services.update');
+    Route::put('/admin/services/{service}', [ServiceController::class, 'update'])
+        ->name('admin.services.update');
 
-Route::delete('/admin/services/{service}', [ServiceController::class, 'destroy'])
-    ->name('admin.services.destroy');
+    Route::delete('/admin/services/{service}', [ServiceController::class, 'destroy'])
+        ->name('admin.services.destroy');
 
-Route::get('/admin/customers/pending', [CustomerApprovalController::class, 'pending'])
-    ->name('admin.customers.pending');
+    Route::get('/admin/customers/pending', [CustomerApprovalController::class, 'pending'])
+        ->name('admin.customers.pending');
 
-Route::get('/admin/customers', [CustomerApprovalController::class, 'index'])
-    ->name('admin.customers.index');
+    Route::get('/admin/customers', [CustomerApprovalController::class, 'index'])
+        ->name('admin.customers.index');
 
-Route::put('/admin/customers/{user}', [CustomerApprovalController::class, 'update'])
-    ->name('admin.customers.update');
+    Route::put('/admin/customers/{user}', [CustomerApprovalController::class, 'update'])
+        ->name('admin.customers.update');
 
-Route::delete('/admin/customers/{user}', [CustomerApprovalController::class, 'destroy'])
-    ->name('admin.customers.destroy');
+    Route::delete('/admin/customers/{user}', [CustomerApprovalController::class, 'destroy'])
+        ->name('admin.customers.destroy');
 
-Route::put('/admin/customers/{user}/approve', [CustomerApprovalController::class, 'approve'])
-    ->name('admin.customers.approve');
+    Route::put('/admin/customers/{user}/approve', [CustomerApprovalController::class, 'approve'])
+        ->name('admin.customers.approve');
 
-Route::put('/admin/customers/{user}/reject', [CustomerApprovalController::class, 'reject'])
-    ->name('admin.customers.reject');
+    Route::put('/admin/customers/{user}/reject', [CustomerApprovalController::class, 'reject'])
+        ->name('admin.customers.reject');
 
-Route::get('/admin/technicians', [TechnicianController::class, 'index'])->name('admin.technicians');
-Route::post('/admin/technicians', [TechnicianController::class, 'store'])->name('admin.technicians.store');
-Route::put('/admin/technicians/{user}', [TechnicianController::class, 'update'])->name('admin.technicians.update');
-Route::delete('/admin/technicians/{user}', [TechnicianController::class, 'destroy'])->name('admin.technicians.destroy');
+    Route::get('/admin/technicians', [TechnicianController::class, 'index'])->name('admin.technicians');
+    Route::post('/admin/technicians', [TechnicianController::class, 'store'])->name('admin.technicians.store');
+    Route::put('/admin/technicians/{user}', [TechnicianController::class, 'update'])->name('admin.technicians.update');
+    Route::delete('/admin/technicians/{user}', [TechnicianController::class, 'destroy'])->name('admin.technicians.destroy');
 
-Route::get('/admin/repairs', [RepairController::class, 'index'])
-    ->name('admin.repairs');
+    Route::get('/admin/repairs', [RepairController::class, 'index'])
+        ->name('admin.repairs');
 
-Route::post('/admin/repairs', [RepairController::class, 'store'])
-    ->name('admin.repairs.store');
+    Route::post('/admin/repairs', [RepairController::class, 'store'])
+        ->name('admin.repairs.store');
 
-Route::put('/admin/repairs/{repair}', [RepairController::class, 'update'])
-    ->name('admin.repairs.update');
+    Route::put('/admin/repairs/{repair}', [RepairController::class, 'update'])
+        ->name('admin.repairs.update');
 
-Route::delete('/admin/repairs/{repair}', [RepairController::class, 'destroy'])
-    ->name('admin.repairs.destroy');
+    Route::delete('/admin/repairs/{repair}', [RepairController::class, 'destroy'])
+        ->name('admin.repairs.destroy');
 
-Route::get('/admin/bookings/quotation', [BookingController::class, 'quotation'])
-    ->name('admin.bookings.quotation');
+    Route::get('/admin/bookings/quotation', [BookingController::class, 'quotation'])
+        ->name('admin.bookings.quotation');
 
-Route::put('/admin/bookings/{booking}/quotation', [BookingController::class, 'sendQuotation'])
-    ->name('admin.bookings.sendQuotation');
+    Route::put('/admin/bookings/{booking}/quotation', [BookingController::class, 'sendQuotation'])
+        ->name('admin.bookings.sendQuotation');
 
-Route::get('/admin/bookings/{booking}/quotation-pdf',
-    [BookingController::class, 'generateQuotationPdf'])
-    ->name('admin.bookings.quotation.pdf');
+    Route::get('/admin/bookings/{booking}/quotation-pdf',
+        [BookingController::class, 'generateQuotationPdf'])
+        ->name('admin.bookings.quotation.pdf');
+});
     
 
 /*
@@ -213,35 +212,37 @@ Route::get('/admin/bookings/{booking}/quotation-pdf',
 | TECHNICIAN
 |--------------------------------------------------------------------------
 */
-Route::get('/technician/dashboard', [TechnicianDashboardController::class, 'index'])
-    ->name('technician.dashboard');
+Route::middleware(['auth', 'role:technician'])->group(function () {
+    Route::get('/technician/dashboard', [TechnicianDashboardController::class, 'index'])
+        ->name('technician.dashboard');
 
-Route::get('/technician/assigned-jobs', [TechnicianDashboardController::class, 'assignedJobs'])
-    ->name('technician.assigned.jobs');
+    Route::get('/technician/assigned-jobs', [TechnicianDashboardController::class, 'assignedJobs'])
+        ->name('technician.assigned.jobs');
 
-Route::get('/technician/assigned-jobs/{booking}', [TechnicianDashboardController::class, 'showJob'])
-    ->name('technician.assigned.show');
+    Route::get('/technician/assigned-jobs/{booking}', [TechnicianDashboardController::class, 'showJob'])
+        ->name('technician.assigned.show');
 
-Route::get('/technician/availability', [TechnicianDashboardController::class, 'availability'])
-    ->name('technician.availability');
+    Route::get('/technician/availability', [TechnicianDashboardController::class, 'availability'])
+        ->name('technician.availability');
 
-Route::put('/technician/bookings/{booking}/inspection', [TechnicianDashboardController::class, 'updateInspection'])
-    ->name('technician.bookings.inspection');
+    Route::put('/technician/bookings/{booking}/inspection', [TechnicianDashboardController::class, 'updateInspection'])
+        ->name('technician.bookings.inspection');
 
-Route::put('/technician/bookings/{booking}/progress', [TechnicianDashboardController::class, 'updateProgress'])
-    ->name('technician.bookings.progress');
+    Route::put('/technician/bookings/{booking}/progress', [TechnicianDashboardController::class, 'updateProgress'])
+        ->name('technician.bookings.progress');
 
-Route::put('/technician/bookings/{booking}/finish', [TechnicianDashboardController::class, 'finishRepair'])
-    ->name('technician.bookings.finish');
+    Route::put('/technician/bookings/{booking}/finish', [TechnicianDashboardController::class, 'finishRepair'])
+        ->name('technician.bookings.finish');
 
-Route::post('/technician/availability', [TechnicianDashboardController::class, 'storeAvailability'])
-    ->name('technician.availability.store');
+    Route::post('/technician/availability', [TechnicianDashboardController::class, 'storeAvailability'])
+        ->name('technician.availability.store');
 
-Route::put('/technician/availability/{availability}', [TechnicianDashboardController::class, 'updateAvailability'])
-    ->name('technician.availability.update');
+    Route::put('/technician/availability/{availability}', [TechnicianDashboardController::class, 'updateAvailability'])
+        ->name('technician.availability.update');
 
-Route::delete('/technician/availability/{availability}', [TechnicianDashboardController::class, 'deleteAvailability'])
-    ->name('technician.availability.delete');
+    Route::delete('/technician/availability/{availability}', [TechnicianDashboardController::class, 'deleteAvailability'])
+        ->name('technician.availability.delete');
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -260,4 +261,3 @@ Route::get('/test-email', function () {
 
     return 'Email berjaya dihantar!';
 });
-

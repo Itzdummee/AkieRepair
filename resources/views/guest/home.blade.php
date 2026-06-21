@@ -404,6 +404,445 @@
                 grid-template-columns:1fr;
             }
         }
+
+        html,
+        body{
+            max-width:100%;
+            overflow-x:hidden;
+        }
+
+        img{
+            max-width:100%;
+            height:auto;
+        }
+
+        @media(max-width:900px){
+            .navbar{
+                height:auto;
+                min-height:72px;
+                padding:14px 24px;
+                flex-wrap:wrap;
+                gap:14px;
+            }
+
+            .logo{
+                font-size:24px;
+            }
+
+            .nav-links{
+                order:3;
+                width:100%;
+                gap:22px;
+                overflow-x:auto;
+                padding:4px 0 2px;
+                scrollbar-width:none;
+            }
+
+            .nav-links::-webkit-scrollbar{
+                display:none;
+            }
+
+            .nav-links a{
+                white-space:nowrap;
+                font-size:14px;
+            }
+
+            .nav-auth-group{
+                gap:10px;
+                flex-wrap:wrap;
+                justify-content:flex-end;
+            }
+
+            .nav-btn{
+                padding:9px 16px;
+                font-size:13px;
+            }
+
+            .hero{
+                min-height:auto;
+                padding:150px 32px 70px;
+                text-align:left;
+            }
+
+            .hero-left h1{
+                font-size:clamp(2.6rem, 9vw, 4.2rem);
+            }
+
+            .hero-left p{
+                font-size:17px;
+            }
+
+            .hero-card{
+                width:min(100%, 430px);
+                padding:24px;
+                border-radius:22px;
+            }
+
+            section{
+                padding:70px 32px;
+            }
+
+            .section-title{
+                margin-bottom:40px;
+            }
+
+            .section-title h2{
+                font-size:clamp(2rem, 7vw, 3.2rem);
+            }
+
+            .price-row{
+                align-items:flex-start;
+                gap:8px;
+            }
+        }
+
+        @media(max-width:600px){
+            .navbar{
+                position:sticky;
+                padding:12px 16px;
+            }
+
+            .nav-auth-group{
+                width:100%;
+                justify-content:stretch;
+            }
+
+            .nav-btn{
+                flex:1;
+                text-align:center;
+                padding:9px 10px;
+            }
+
+            .hero{
+                padding:42px 20px 56px;
+                gap:34px;
+            }
+
+            .hero-left h1{
+                font-size:2.35rem;
+            }
+
+            .hero-left p{
+                font-size:16px;
+                margin-bottom:28px;
+            }
+
+            .hero-buttons{
+                flex-direction:column;
+                width:100%;
+            }
+
+            .hero-btn,
+            .repair-btn{
+                width:100%;
+                box-sizing:border-box;
+                text-align:center;
+            }
+
+            .hero-card{
+                padding:16px;
+                border-radius:18px;
+            }
+
+            section{
+                padding:52px 20px;
+            }
+
+            .service-card,
+            .repair-card,
+            .process-card{
+                border-radius:18px;
+                padding:28px 20px;
+            }
+
+            .repair-card{
+                padding:0;
+            }
+
+            .repair-top,
+            .repair-body{
+                padding:24px 20px;
+            }
+
+            .price-row{
+                flex-direction:column;
+                align-items:flex-start;
+            }
+
+            footer{
+                padding:28px 20px;
+            }
+        }
+
+        .nav-toggle{
+            display:none;
+        }
+
+        @media(max-width:900px){
+            .nav-toggle{
+                width:42px;
+                height:42px;
+                border:1px solid #e5e7eb;
+                border-radius:10px;
+                background:#f9fafb;
+                color:#111827;
+                display:inline-flex;
+                align-items:center;
+                justify-content:center;
+                font-size:24px;
+                cursor:pointer;
+                margin-left:auto;
+            }
+
+            .navbar{
+                align-items:flex-start;
+            }
+
+            .nav-links,
+            .nav-auth-group{
+                display:none;
+                width:100%;
+            }
+
+            .navbar.nav-open .nav-links,
+            .navbar.nav-open .nav-auth-group{
+                display:flex;
+            }
+
+            .nav-links{
+                order:3;
+                flex-direction:column;
+                gap:0;
+                padding-top:8px;
+                overflow:visible;
+            }
+
+            .nav-links a{
+                padding:12px 0;
+                border-top:1px solid #f3f4f6;
+            }
+
+            .nav-auth-group{
+                order:4;
+                flex-direction:column;
+                gap:10px;
+                padding-top:12px;
+                align-items:stretch;
+            }
+
+            .nav-btn{
+                width:100%;
+                text-align:center;
+                box-sizing:border-box;
+            }
+        }
+
+        @media(max-width:600px){
+            .nav-toggle{
+                width:40px;
+                height:40px;
+                font-size:22px;
+            }
+
+            .navbar{
+                position:sticky;
+                top:0;
+            }
+        }
+
+        :root{
+            --ui-text:#0f172a;
+            --ui-muted:#64748b;
+            --ui-line:#e2e8f0;
+            --ui-soft:#f8fafc;
+            --ui-accent:#16a34a;
+            --ui-blue:#2563eb;
+            --ui-shadow:0 18px 45px rgba(15, 23, 42, .08);
+        }
+
+        body{
+            background:#f4f7fb;
+            color:var(--ui-text);
+            text-rendering:optimizeLegibility;
+        }
+
+        .navbar{
+            height:auto;
+            min-height:76px;
+            padding:0 clamp(20px, 5vw, 70px);
+            background:rgba(255, 255, 255, .94);
+            border-bottom:1px solid rgba(226, 232, 240, .9);
+            box-shadow:0 12px 35px rgba(15, 23, 42, .055);
+            backdrop-filter:blur(14px);
+        }
+
+        .logo{
+            color:var(--ui-text);
+            font-size:clamp(1.45rem, 2.2vw, 1.9rem);
+            letter-spacing:0;
+        }
+
+        .nav-links{
+            gap:clamp(18px, 3vw, 36px);
+        }
+
+        .nav-links a{
+            color:#334155;
+            font-size:.95rem;
+            transition:color .16s ease;
+        }
+
+        .nav-btn,
+        .hero-btn,
+        .tab-btn,
+        .repair-btn{
+            border-radius:12px;
+            box-shadow:none;
+            transition:transform .16s ease, box-shadow .16s ease, background-color .16s ease, border-color .16s ease;
+        }
+
+        .nav-btn:hover,
+        .hero-btn:hover,
+        .tab-btn:hover,
+        .repair-btn:hover{
+            transform:translateY(-1px);
+        }
+
+        .btn-customer,
+        .btn-green,
+        .tab-btn.active,
+        .tab-btn:hover,
+        .repair-btn{
+            background:var(--ui-accent);
+            border-color:var(--ui-accent);
+        }
+
+        .hero{
+            min-height:calc(100vh - 20px);
+            padding:clamp(120px, 13vw, 150px) clamp(22px, 6vw, 90px) clamp(68px, 8vw, 90px);
+            background:linear-gradient(135deg, #0f172a 0%, #1d4ed8 58%, #16a34a 100%);
+            gap:clamp(32px, 5vw, 72px);
+        }
+
+        .hero-left h1{
+            font-size:clamp(2.45rem, 5.4vw, 4.25rem);
+            letter-spacing:0;
+        }
+
+        .hero-left p{
+            max-width:650px;
+            color:#dbeafe;
+            font-size:clamp(1rem, 1.45vw, 1.18rem);
+        }
+
+        .hero-card{
+            width:min(100%, 460px);
+            border:1px solid rgba(255, 255, 255, .75);
+            border-radius:22px;
+            box-shadow:0 24px 60px rgba(15, 23, 42, .25);
+        }
+
+        .hero-card img{
+            border-radius:16px;
+        }
+
+        section{
+            padding:clamp(58px, 8vw, 96px) clamp(20px, 6vw, 90px);
+        }
+
+        .section-title{
+            margin-bottom:clamp(34px, 5vw, 56px);
+        }
+
+        .section-title h2{
+            color:var(--ui-text);
+            font-size:clamp(2rem, 4.3vw, 3.1rem);
+            line-height:1.1;
+            letter-spacing:0;
+        }
+
+        .section-title p{
+            color:var(--ui-muted);
+            font-size:clamp(.98rem, 1.25vw, 1.08rem);
+        }
+
+        .services-grid,
+        .repair-grid,
+        .process-grid{
+            gap:clamp(18px, 2.5vw, 30px);
+        }
+
+        .service-card,
+        .repair-card,
+        .process-card{
+            border:1px solid var(--ui-line);
+            border-radius:18px;
+            box-shadow:var(--ui-shadow);
+        }
+
+        .service-card:hover,
+        .repair-card:hover{
+            transform:translateY(-4px);
+        }
+
+        .service-icon{
+            border-radius:16px;
+        }
+
+        .service-card h3{
+            color:var(--ui-text);
+            letter-spacing:0;
+        }
+
+        .repair-top h3{
+            color:white;
+            letter-spacing:0;
+        }
+
+        .repair-top{
+            background:linear-gradient(135deg, #0f172a, #1e293b);
+        }
+
+        .price-row{
+            gap:16px;
+        }
+
+        .price-row h4{
+            color:var(--ui-text);
+        }
+
+        .process-number{
+            background:var(--ui-accent);
+        }
+
+        @media(max-width:900px){
+            .navbar{
+                padding:14px 22px;
+            }
+
+            .hero{
+                padding:118px 28px 64px;
+            }
+        }
+
+        @media(max-width:600px){
+            .navbar{
+                padding:12px 16px;
+            }
+
+            .hero{
+                padding:44px 20px 56px;
+            }
+
+            .hero-left h1{
+                font-size:clamp(2.1rem, 11vw, 2.6rem);
+            }
+
+            .service-card,
+            .process-card{
+                padding:26px 20px;
+            }
+        }
     </style>
 </head>
 
@@ -411,6 +850,9 @@
 
 <div class="navbar">
     <div class="logo">AkieRepair</div>
+    <button type="button" class="nav-toggle" aria-label="Open navigation menu" aria-expanded="false">
+        <i class="bi bi-list"></i>
+    </button>
 
     <div class="nav-links">
         <a href="#home">Home</a>
@@ -611,6 +1053,33 @@
 </footer>
 
 <script>
+    const mainNavbar = document.querySelector('.navbar');
+    const navToggle = document.querySelector('.nav-toggle');
+
+    if(navToggle && mainNavbar){
+        navToggle.addEventListener('click', function(){
+            const isOpen = mainNavbar.classList.toggle('nav-open');
+            navToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            navToggle.innerHTML = isOpen ? '<i class="bi bi-x-lg"></i>' : '<i class="bi bi-list"></i>';
+        });
+
+        document.querySelectorAll('.nav-links a, .nav-auth-group a').forEach(function(link){
+            link.addEventListener('click', function(){
+                mainNavbar.classList.remove('nav-open');
+                navToggle.setAttribute('aria-expanded', 'false');
+                navToggle.innerHTML = '<i class="bi bi-list"></i>';
+            });
+        });
+
+        document.addEventListener('keydown', function(event){
+            if(event.key === 'Escape'){
+                mainNavbar.classList.remove('nav-open');
+                navToggle.setAttribute('aria-expanded', 'false');
+                navToggle.innerHTML = '<i class="bi bi-list"></i>';
+            }
+        });
+    }
+
     function showCategory(type, button){
         document.querySelectorAll('.device-category').forEach(section => {
             section.classList.add('hide');

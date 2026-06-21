@@ -292,6 +292,179 @@
                 padding: 40px 30px;
             }
         }
+
+        @media(max-width: 560px) {
+            .auth-bg {
+                align-items: flex-start;
+                padding: 16px;
+            }
+
+            .auth-card {
+                min-height: auto;
+                border-radius: 14px;
+            }
+
+            .auth-left {
+                padding: 28px 22px;
+                gap: 24px;
+            }
+
+            .brand-info .logo {
+                font-size: 24px;
+            }
+
+            .welcome-section {
+                margin: 20px 0;
+            }
+
+            .welcome-section h1 {
+                font-size: 24px;
+            }
+
+            .welcome-section p,
+            .feature-tag {
+                font-size: 14px;
+            }
+
+            .auth-right {
+                padding: 30px 20px;
+            }
+
+            .auth-form-container h2 {
+                font-size: 24px;
+            }
+
+            .input-box input,
+            .login-btn,
+            .home-btn {
+                height: 48px;
+            }
+        }
+
+        :root {
+            --ui-text: #0f172a;
+            --ui-muted: #64748b;
+            --ui-line: #e2e8f0;
+            --ui-soft: #f8fafc;
+            --ui-accent: #16a34a;
+            --ui-blue: #2563eb;
+        }
+
+        body {
+            color: var(--ui-text);
+            text-rendering: optimizeLegibility;
+        }
+
+        .auth-bg {
+            background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 58%, #16a34a 100%);
+            padding: clamp(22px, 5vw, 48px);
+        }
+
+        .auth-card {
+            width: min(1000px, 100%);
+            border: 1px solid rgba(255, 255, 255, .32);
+            border-radius: 22px;
+            box-shadow: 0 28px 70px rgba(15, 23, 42, .28);
+        }
+
+        .auth-left {
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+        }
+
+        .brand-info .logo {
+            letter-spacing: 0;
+        }
+
+        .welcome-section h1,
+        .auth-form-container h2 {
+            letter-spacing: 0;
+            line-height: 1.15;
+        }
+
+        .welcome-section h1 {
+            font-size: clamp(1.8rem, 3.2vw, 2.45rem);
+        }
+
+        .welcome-section p {
+            color: #dbeafe;
+        }
+
+        .auth-form-container h2 {
+            color: var(--ui-text);
+            font-size: clamp(1.55rem, 2.2vw, 1.85rem);
+        }
+
+        .auth-form-container p.subtitle {
+            color: var(--ui-muted);
+            line-height: 1.55;
+        }
+
+        .feature-tag {
+            color: #e0f2fe;
+        }
+
+        .input-box input {
+            border-color: var(--ui-line);
+            border-radius: 10px;
+            background: var(--ui-soft);
+        }
+
+        .input-box input:focus {
+            border-color: var(--ui-accent);
+            box-shadow: 0 0 0 4px rgba(22, 163, 74, .12);
+        }
+
+        .login-btn,
+        .home-btn {
+            border-radius: 10px;
+            letter-spacing: 0;
+        }
+
+        .login-btn {
+            background: var(--ui-accent);
+        }
+
+        .login-btn:hover {
+            background: #15803d;
+        }
+
+        .home-btn {
+            border-color: var(--ui-line);
+            color: #334155;
+            background: white;
+        }
+
+        .switch-link {
+            color: var(--ui-accent);
+        }
+
+        .error-text,
+        .success-text {
+            border-radius: 10px;
+            line-height: 1.45;
+        }
+
+        @media(max-width: 900px) {
+            .auth-card {
+                min-height: auto;
+            }
+        }
+
+        @media(max-width: 560px) {
+            .auth-bg {
+                min-height: 100svh;
+                padding: 14px;
+            }
+
+            .auth-card {
+                border-radius: 16px;
+            }
+
+            .auth-left,
+            .auth-right {
+                padding: 28px 20px;
+            }
+        }
     </style>
 </head>
 <body>

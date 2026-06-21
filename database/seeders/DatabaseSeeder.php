@@ -12,6 +12,13 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call(AdminSeeder::class);
+        // $this->call(AdminSeeder::class);
+        // $this->call(RepairSeeder::class);
+        $this->call(ServiceSeeder::class);
+
+        // $this->call([
+        //     ServiceSeeder::class,
+        //     DeviceSeeder::class,
+        // ]);
     }
 }
