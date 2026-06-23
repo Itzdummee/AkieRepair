@@ -7,7 +7,6 @@ use App\Models\Booking;
 use App\Models\BookingTimeline;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Stripe\Stripe;
 use Stripe\Checkout\Session;
@@ -64,10 +63,44 @@ class PaymentController extends Controller
         }
 
         try {
-            Stripe::setApiKey(config('services.stripe.secret'));
+            $stripeSecret = $this->stripeSecret();
+
+            if (!$stripeSecret) {
+                Log::error('PaymentController@initiate - Missing Stripe secret key', [
+                    'booking_id' => $booking->id,
+                ]);
+
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Payment service is not configured. Please contact admin.',
+                ], 500);
+            }
+
+            Stripe::setApiKey($stripeSecret);
             
             $deviceName = $booking->device->device_name ?? 'Device Repair';
-            $amount = (int)($booking->quotation_price * 100); // Amount in cents
+            $amount = (int) round(((float) $booking->quotation_price) * 100); // Amount in cents
+
+            if ($amount <= 0) {
+                Log::warning('PaymentController@initiate - Invalid payment amount', [
+                    'booking_id' => $booking->id,
+                    'quotation_price' => $booking->quotation_price,
+                ]);
+
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Payment amount is invalid. Please contact admin.',
+                ], 422);
+            }
+
+            $successUrl = $this->absolutePaymentUrl(
+                $request,
+                route('customer.payment.callback', ['booking' => $booking->id], false) . '?session_id={CHECKOUT_SESSION_ID}'
+            );
+            $cancelUrl = $this->absolutePaymentUrl(
+                $request,
+                route('customer.booking.show', ['booking' => $booking->id], false)
+            );
 
             $checkout_session = Session::create([
                 'line_items' => [[
@@ -82,8 +115,8 @@ class PaymentController extends Controller
                     'quantity' => 1,
                 ]],
                 'mode' => 'payment',
-                'success_url' => route('customer.payment.callback', ['booking' => $booking->id]) . '?session_id={CHECKOUT_SESSION_ID}',
-                'cancel_url' => route('customer.booking.show', ['booking' => $booking->id]),
+                'success_url' => $successUrl,
+                'cancel_url' => $cancelUrl,
                 'customer_email' => Auth::user()->email,
                 'metadata' => [
                     'booking_id' => $booking->id
@@ -101,14 +134,18 @@ class PaymentController extends Controller
                 'paymentUrl' => $checkout_session->url,
             ]);
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('PaymentController@initiate - Exception', [
-                'message' => $e->getMessage()
+                'booking_id' => $booking->id,
+                'exception' => get_class($e),
+                'message' => $e->getMessage(),
             ]);
             
             return response()->json([
                 'success' => false,
-                'error' => 'Payment initialization failed: ' . $e->getMessage()
+                'error' => config('app.debug')
+                    ? 'Payment initialization failed: ' . $e->getMessage()
+                    : 'Payment initialization failed. Please contact admin.',
             ], 500);
         }
     }
@@ -130,7 +167,19 @@ class PaymentController extends Controller
                 return redirect()->route('customer.booking.status')->with('error', 'Invalid payment session.');
             }
 
-            Stripe::setApiKey(config('services.stripe.secret'));
+            $stripeSecret = $this->stripeSecret();
+
+            if (!$stripeSecret) {
+                Log::error('PaymentController@callback - Missing Stripe secret key', [
+                    'booking_id' => $booking->id,
+                ]);
+
+                return redirect()
+                    ->route('customer.booking.status')
+                    ->with('error', 'Payment service is not configured. Please contact admin.');
+            }
+
+            Stripe::setApiKey($stripeSecret);
             $session = Session::retrieve($sessionId);
 
             if ($session->payment_status === 'paid') {
@@ -156,8 +205,9 @@ class PaymentController extends Controller
                     ->route('customer.booking.status')
                     ->with('warning', 'Payment is not completed yet. Status: ' . $session->payment_status);
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('PaymentController@callback - Exception', [
+                'exception' => get_class($e),
                 'message' => $e->getMessage(),
                 'booking_id' => $booking->id
             ]);
@@ -166,5 +216,38 @@ class PaymentController extends Controller
                 ->route('customer.booking.status')
                 ->with('error', 'Payment verification failed: ' . $e->getMessage());
         }
+    }
+
+    private function stripeSecret(): ?string
+    {
+        $secret = config('services.stripe.secret');
+
+        if (!is_string($secret) || trim($secret) === '') {
+            return null;
+        }
+
+        return trim($secret);
+    }
+
+    private function absolutePaymentUrl(Request $request, string $path): string
+    {
+        return rtrim($this->paymentBaseUrl($request), '/') . '/' . ltrim($path, '/');
+    }
+
+    private function paymentBaseUrl(Request $request): string
+    {
+        $configuredUrl = config('app.url');
+        $configuredHost = is_string($configuredUrl) ? parse_url($configuredUrl, PHP_URL_HOST) : null;
+        $requestBaseUrl = rtrim($request->getSchemeAndHttpHost(), '/');
+
+        if (!$configuredHost || in_array($configuredHost, ['localhost', '127.0.0.1'], true)) {
+            return $requestBaseUrl;
+        }
+
+        if ($request->getHost() === $configuredHost) {
+            return $requestBaseUrl;
+        }
+
+        return rtrim($configuredUrl, '/');
     }
 }

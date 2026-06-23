@@ -585,32 +585,39 @@
 </div>
 
 <script>
+    const paymentInitiateUrl = @json(route('customer.payment.initiate', ['booking' => $booking->id], false));
+
     document.getElementById('paymentBtn').addEventListener('click', async function() {
         const btn = this;
         btn.disabled = true;
         btn.innerHTML = '<i class="bi bi-arrow-repeat"></i> Redirecting to Stripe...';
 
         try {
-            const response = await fetch('{{ route("customer.payment.initiate", ["booking" => $booking->id]) }}', {
+            const response = await fetch(paymentInitiateUrl, {
                 method: 'POST',
                 headers: {
+                    'Accept': 'application/json',
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'X-Requested-With': 'XMLHttpRequest',
                 },
             });
 
-            const data = await response.json();
+            const contentType = response.headers.get('content-type') || '';
+            const data = contentType.includes('application/json') ? await response.json() : {};
+
+            if (!response.ok) {
+                throw new Error(data.error || `Payment request failed (${response.status}). Please refresh and try again.`);
+            }
 
             if (data.success && data.paymentUrl) {
                 window.location.href = data.paymentUrl;
             } else {
-                alert(data.error || 'Failed to initiate payment');
-                btn.disabled = false;
-                btn.innerHTML = '<i class="bi bi-lock-fill"></i> Pay with Stripe';
+                throw new Error(data.error || 'Failed to initiate payment');
             }
         } catch (error) {
             console.error('Error:', error);
-            alert('An error occurred while processing payment');
+            alert(error.message || 'An error occurred while processing payment');
             btn.disabled = false;
             btn.innerHTML = '<i class="bi bi-lock-fill"></i> Pay with Stripe';
         }
