@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Device;
+use App\Models\Service;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -21,10 +23,14 @@ class HomeController extends Controller
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function index()
+public function index()
 {
-    $services = Service::with(['repairs.device'])->get();
-    $devices = Device::with('repairs.service')->get();
+    $services = Service::with(['repairs' => fn ($query) => $query->where('is_active', true), 'repairs.device'])
+        ->where('is_active', true)
+        ->get();
+    $devices = Device::with(['repairs' => fn ($query) => $query->where('is_active', true), 'repairs.service'])
+        ->where('is_active', true)
+        ->get();
 
     return view('guest.home', compact('services', 'devices'));
 }

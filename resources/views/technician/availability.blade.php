@@ -89,7 +89,7 @@
 
     .form-grid {
         display: grid;
-        grid-template-columns: 2fr 2fr 1fr;
+        grid-template-columns: 1.5fr 1.5fr 2fr 1fr;
         gap: 20px;
         align-items: flex-end;
     }
@@ -424,24 +424,29 @@
 
             <div class="form-grid">
                 <div class="input-group">
-                    <label><i class="bi bi-calendar-check"></i> Select Date</label>
-                    <input type="date" name="unavailable_date" min="{{ date('Y-m-d') }}" required>
+                    <label>Start Date</label>
+                    <input type="date" name="unavailable_date" id="startDate" min="{{ date('Y-m-d') }}" required>
                 </div>
 
                 <div class="input-group">
-                    <label><i class="bi bi-bookmark-fill"></i> Reason</label>
+                    <label>End Date</label>
+                    <input type="date" name="unavailable_end_date" id="endDate" min="{{ date('Y-m-d') }}">
+                </div>
+
+                <div class="input-group">
+                    <label>Reason</label>
                     <select name="reason">
-                        <option value="Personal day off">📅 Personal day off</option>
-                        <option value="Sick leave">🤒 Sick leave</option>
-                        <option value="Training / Certification">📚 Training / Certification</option>
-                        <option value="Holiday">🎉 Holiday</option>
-                        <option value="Family emergency">🏠 Family emergency</option>
-                        <option value="Other">⚙️ Other</option>
+                        <option value="Personal day off">Personal day off</option>
+                        <option value="Sick leave">Sick leave</option>
+                        <option value="Training / Certification">Training / Certification</option>
+                        <option value="Holiday">Holiday</option>
+                        <option value="Family emergency">Family emergency</option>
+                        <option value="Other">Other</option>
                     </select>
                 </div>
 
                 <button type="submit" class="btn-primary">
-                    <i class="bi bi-plus-circle"></i> Block Selected Day
+                    <i class="bi bi-plus-circle"></i> Block Days
                 </button>
             </div>
         </form>
@@ -450,7 +455,7 @@
     <div class="availability-section">
         <div class="section-header">
             <h2><i class="bi bi-calendar-x"></i> Blocked Days</h2>
-            <div class="days-count">{{ $availabilities->count() }} blocked day(s)</div>
+            <div class="days-count">{{ $availabilities->count() }} blocked period(s)</div>
         </div>
 
         <div class="cards-grid">
@@ -459,19 +464,11 @@
                     <div class="card-header">
                         <span class="day-badge">
                             <i class="bi bi-calendar-event" style="color: var(--blue);"></i>
-                            {{ \Carbon\Carbon::parse($availability->unavailable_date)->format('D, d M Y') }}
+                            {{ $availability->display_date_range }}
                         </span>
 
                         <span class="reason-badge">
-                            @switch($availability->reason)
-                                @case('Personal day off') 📅 @break
-                                @case('Sick leave') 🤒 @break
-                                @case('Training / Certification') 📚 @break
-                                @case('Holiday') 🎉 @break
-                                @case('Family emergency') 🏠 @break
-                                @default ⚙️
-                            @endswitch
-                            {{ $availability->reason }}
+                            {{ $availability->reason ?? 'No reason specified' }}
                         </span>
                     </div>
 
@@ -490,9 +487,10 @@
                     <div class="card-actions">
                         <button type="button" class="edit-btn"
                                 onclick="openEditModal(
-                                    '{{ $availability->id }}',
-                                    '{{ $availability->unavailable_date }}',
-                                    '{{ $availability->reason }}'
+                                    @js($availability->id),
+                                    @js($availability->unavailable_date->format('Y-m-d')),
+                                    @js(($availability->unavailable_end_date ?? $availability->unavailable_date)->format('Y-m-d')),
+                                    @js($availability->reason)
                                 )">
                             <i class="bi bi-pencil-square"></i> Edit
                         </button>
@@ -530,19 +528,24 @@
             @method('PUT')
 
             <div class="input-group" style="width:100%; margin-bottom:18px;">
-                <label>Unavailable Date</label>
+                <label>Start Date</label>
                 <input type="date" name="unavailable_date" id="editDate" min="{{ date('Y-m-d') }}" required>
+            </div>
+
+            <div class="input-group" style="width:100%; margin-bottom:18px;">
+                <label>End Date</label>
+                <input type="date" name="unavailable_end_date" id="editEndDate" min="{{ date('Y-m-d') }}">
             </div>
 
             <div class="input-group" style="width:100%; margin-bottom:18px;">
                 <label>Reason</label>
                 <select name="reason" id="editReason">
-                    <option value="Personal day off">📅 Personal day off</option>
-                    <option value="Sick leave">🤒 Sick leave</option>
-                    <option value="Training / Certification">📚 Training / Certification</option>
-                    <option value="Holiday">🎉 Holiday</option>
-                    <option value="Family emergency">🏠 Family emergency</option>
-                    <option value="Other">⚙️ Other</option>
+                    <option value="Personal day off">Personal day off</option>
+                    <option value="Sick leave">Sick leave</option>
+                    <option value="Training / Certification">Training / Certification</option>
+                    <option value="Holiday">Holiday</option>
+                    <option value="Family emergency">Family emergency</option>
+                    <option value="Other">Other</option>
                 </select>
             </div>
 
@@ -555,8 +558,34 @@
 </div>
 
 <script>
-    function openEditModal(id, date, reason){
-        document.getElementById('editDate').value = date;
+    const startDateInput = document.getElementById('startDate');
+    const endDateInput = document.getElementById('endDate');
+    const editDateInput = document.getElementById('editDate');
+    const editEndDateInput = document.getElementById('editEndDate');
+
+    function syncEndDateMin(startInput, endInput) {
+        if (!startInput || !endInput) {
+            return;
+        }
+
+        endInput.min = startInput.value || startInput.min;
+        if (endInput.value && startInput.value && endInput.value < startInput.value) {
+            endInput.value = startInput.value;
+        }
+    }
+
+    startDateInput?.addEventListener('change', function () {
+        syncEndDateMin(startDateInput, endDateInput);
+    });
+
+    editDateInput?.addEventListener('change', function () {
+        syncEndDateMin(editDateInput, editEndDateInput);
+    });
+
+    function openEditModal(id, date, endDate, reason){
+        editDateInput.value = date;
+        editEndDateInput.value = endDate || date;
+        syncEndDateMin(editDateInput, editEndDateInput);
         document.getElementById('editReason').value = reason || 'Other';
 
         document.getElementById('editForm').action = '/technician/availability/' + id;

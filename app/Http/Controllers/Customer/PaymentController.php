@@ -198,8 +198,8 @@ class PaymentController extends Controller
                 ]);
 
                 return redirect()
-                    ->route('customer.booking.history')
-                    ->with('success', 'Payment successful! Your repair service is now complete.');
+                    ->route('customer.review.create', $booking->id)
+                    ->with('success', 'Payment successful! Please rate your repair service.');
             } else {
                 return redirect()
                     ->route('customer.booking.status')
@@ -216,38 +216,5 @@ class PaymentController extends Controller
                 ->route('customer.booking.status')
                 ->with('error', 'Payment verification failed: ' . $e->getMessage());
         }
-    }
-
-    private function stripeSecret(): ?string
-    {
-        $secret = config('services.stripe.secret');
-
-        if (!is_string($secret) || trim($secret) === '') {
-            return null;
-        }
-
-        return trim($secret);
-    }
-
-    private function absolutePaymentUrl(Request $request, string $path): string
-    {
-        return rtrim($this->paymentBaseUrl($request), '/') . '/' . ltrim($path, '/');
-    }
-
-    private function paymentBaseUrl(Request $request): string
-    {
-        $configuredUrl = config('app.url');
-        $configuredHost = is_string($configuredUrl) ? parse_url($configuredUrl, PHP_URL_HOST) : null;
-        $requestBaseUrl = rtrim($request->getSchemeAndHttpHost(), '/');
-
-        if (!$configuredHost || in_array($configuredHost, ['localhost', '127.0.0.1'], true)) {
-            return $requestBaseUrl;
-        }
-
-        if ($request->getHost() === $configuredHost) {
-            return $requestBaseUrl;
-        }
-
-        return rtrim($configuredUrl, '/');
     }
 }

@@ -10,6 +10,7 @@ use App\Models\TechnicianAvailability;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class BookingController extends Controller
 {
@@ -23,6 +24,7 @@ class BookingController extends Controller
         $technicians = User::with('availabilities')
             ->where('role', 'technician')
             ->where('approval_status', 'approved')
+            ->where('is_active', true)
             ->latest()
             ->get();
 
@@ -42,11 +44,17 @@ class BookingController extends Controller
     public function assignTechnician(Request $request, Booking $booking)
     {
         $request->validate([
-            'technician_id' => 'required|exists:users,id',
+            'technician_id' => [
+                'required',
+                Rule::exists('users', 'id')
+                    ->where('role', 'technician')
+                    ->where('approval_status', 'approved')
+                    ->where('is_active', true),
+            ],
         ]);
 
         $isUnavailable = TechnicianAvailability::where('technician_id', $request->technician_id)
-            ->where('unavailable_date', $booking->visit_date)
+            ->coveringDate($booking->visit_date)
             ->exists();
 
         if ($isUnavailable) {
@@ -108,12 +116,10 @@ class BookingController extends Controller
     public function sendQuotation(Request $request, Booking $booking)
     {
         $request->validate([
-            'quotation_price' => 'required|numeric|min:0',
             'quotation_note' => 'nullable|string',
         ]);
 
         $booking->update([
-            'quotation_price' => $request->quotation_price + 50,
             'quotation_note' => $request->quotation_note,
             'quotation_status' => 'Pending Customer Approval',
             'status' => 'Quotation Sent',
@@ -123,6 +129,7 @@ class BookingController extends Controller
         $repairNames = array_filter(array_map('trim', explode(',', $booking->inspection_report ?? '')));
         $repairs = \App\Models\Repair::whereIn('repair_type', $repairNames)
             ->where('device_id', $booking->device_id)
+            ->where('is_active', true)
             ->get();
 
         $pdf = Pdf::loadView('admin.quotation-pdf', [
@@ -156,9 +163,6 @@ class BookingController extends Controller
     }
     public function generateQuotationPdf(Request $request, Booking $booking)
     {
-        if ($request->has('price')) {
-            $booking->quotation_price = $request->input('price');
-        }
         if ($request->has('note')) {
             $booking->quotation_note = $request->input('note');
         }
@@ -168,6 +172,7 @@ class BookingController extends Controller
 
         $repairs = \App\Models\Repair::whereIn('repair_type', $repairNames)
             ->where('device_id', $booking->device_id)
+            ->where('is_active', true)
             ->get();
 
         $pdf = Pdf::loadView('admin.quotation-pdf', [

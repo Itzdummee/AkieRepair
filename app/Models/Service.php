@@ -9,6 +9,11 @@ class Service extends Model
     protected $fillable = [
         'service_type',
         'admin_id',
+        'is_active',
+    ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
     ];
 
     public function repairs()

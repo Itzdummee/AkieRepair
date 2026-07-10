@@ -105,10 +105,16 @@ class RepairController extends Controller
 
     public function destroy(Repair $repair)
     {
-        $repair->delete();
+        $repair->update([
+            'is_active' => ! $repair->is_active,
+        ]);
+
+        $message = $repair->is_active
+            ? 'Repair pricing activated successfully.'
+            : 'Repair pricing deactivated successfully.';
 
         return redirect()
             ->to(route('admin.repairs') . '#repair')
-            ->with('delete', 'Repair deleted successfully.');
+            ->with('delete', $message);
     }
 }

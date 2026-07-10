@@ -224,6 +224,146 @@
         flex-shrink: 0;
     }
 
+    .assigned-bookings-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 16px;
+    }
+    .assigned-booking-card {
+        display: flex;
+        flex-direction: column;
+        min-height: 240px;
+        color: inherit;
+        text-decoration: none;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 18px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    .assigned-booking-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #2563eb, #10b981);
+    }
+    .assigned-booking-card:hover {
+        transform: translateY(-3px);
+        border-color: #93c5fd;
+        box-shadow: 0 14px 24px rgba(15, 23, 42, 0.08);
+    }
+    .assigned-booking-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 18px;
+    }
+    .assigned-booking-id {
+        color: #2563eb;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+    .assigned-booking-card h3 {
+        color: #111827;
+        font-size: 19px;
+        margin: 5px 0 0;
+        font-family: 'Mukta Mahee', sans-serif;
+        line-height: 1.2;
+    }
+    .assigned-booking-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        display: grid;
+        place-items: center;
+        background: #eff6ff;
+        color: #2563eb;
+        flex-shrink: 0;
+    }
+    .assigned-booking-meta {
+        display: grid;
+        gap: 10px;
+        margin-bottom: 18px;
+    }
+    .assigned-booking-meta div {
+        display: flex;
+        gap: 8px;
+        color: #475569;
+        font-size: 14px;
+        line-height: 1.35;
+    }
+    .assigned-booking-meta i {
+        color: #64748b;
+        margin-top: 2px;
+        flex-shrink: 0;
+    }
+    .assigned-booking-action {
+        margin-top: auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding-top: 16px;
+        border-top: 1px solid #f1f5f9;
+        color: #2563eb;
+        font-size: 13px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    .inspection-pager {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        margin-top: 18px;
+        padding-top: 18px;
+        border-top: 1px solid #e2e8f0;
+    }
+    .inspection-page-status {
+        color: #64748b;
+        font-size: 14px;
+        font-weight: 700;
+    }
+    .inspection-pager-actions {
+        display: flex;
+        gap: 8px;
+    }
+    .inspection-pager-btn {
+        width: 42px;
+        height: 42px;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #ffffff;
+        color: #0f5132;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 18px;
+    }
+    .inspection-pager-btn:hover:not(:disabled) {
+        background: #ecfdf5;
+        border-color: #86efac;
+        transform: translateY(-1px);
+    }
+    .inspection-pager-btn:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+    }
+    .inspection-card-paged.is-hidden {
+        display: none;
+    }
+
     .booking-card {
         border: 1px solid #e5e7eb;
         border-radius: 14px;
@@ -494,85 +634,57 @@
                 <p style="margin:0; font-weight:600;">No inspection bookings assigned.</p>
             </div>
         @else
-            <div class="inspection-layout">
-                <div class="booking-list-panel">
-                    <div class="booking-list">
-                        @foreach($inspectionBookings as $index => $booking)
-                            <button type="button"
-                                    class="booking-list-item {{ $index === 0 ? 'active' : '' }}"
-                                    data-booking-id="{{ $booking->id }}">
-                                <div class="booking-list-left">
-                                    <span class="booking-list-id">Booking #{{ $booking->id }}</span>
-                                    <strong>{{ $booking->customer->name ?? '-' }}</strong>
-                                    <span>{{ $booking->device->name ?? '-' }} • {{ $booking->device->brand ?? '-' }}</span>
-                                </div>
-                                <div class="booking-list-right">
-                                    <span>{{ \Carbon\Carbon::parse($booking->visit_date)->format('d M Y') }}</span>
-                                    <i class="bi bi-chevron-right"></i>
-                                </div>
-                            </button>
-                        @endforeach
+            <div class="assigned-bookings-grid" id="inspectionBookingsGrid">
+                @foreach($inspectionBookings->values() as $index => $booking)
+                    <a href="{{ route('technician.bookings.inspection.show', $booking->id) }}"
+                       class="assigned-booking-card inspection-card-paged {{ $index >= 4 ? 'is-hidden' : '' }}"
+                       data-inspection-card>
+                        <div class="assigned-booking-top">
+                            <div>
+                                <span class="assigned-booking-id">Booking #{{ $booking->id }}</span>
+                                <h3>{{ $booking->customer->name ?? '-' }}</h3>
+                            </div>
+                            <div class="assigned-booking-icon">
+                                <i class="bi bi-clipboard-pulse"></i>
+                            </div>
+                        </div>
+
+                        <div class="assigned-booking-meta">
+                            <div>
+                                <i class="bi bi-phone"></i>
+                                <span>{{ $booking->device->name ?? '-' }} - {{ $booking->device->brand ?? '-' }}</span>
+                            </div>
+                            <div>
+                                <i class="bi bi-calendar-event"></i>
+                                <span>{{ $booking->visit_date ? \Carbon\Carbon::parse($booking->visit_date)->format('d M Y') : '-' }}</span>
+                            </div>
+                            <div>
+                                <i class="bi bi-chat-left-text"></i>
+                                <span>{{ \Illuminate\Support\Str::limit($booking->problem_description, 95) }}</span>
+                            </div>
+                        </div>
+
+                        <div class="assigned-booking-action">
+                            <span>Set inspection problem</span>
+                            <i class="bi bi-arrow-right-circle-fill"></i>
+                        </div>
+                    </a>
+                @endforeach
+            </div>
+
+            @if($inspectionBookings->count() > 4)
+                <div class="inspection-pager" data-inspection-pager>
+                    <div class="inspection-page-status" data-inspection-page-status></div>
+                    <div class="inspection-pager-actions">
+                        <button type="button" class="inspection-pager-btn" data-inspection-prev aria-label="Previous inspection bookings">
+                            <i class="bi bi-arrow-left"></i>
+                        </button>
+                        <button type="button" class="inspection-pager-btn" data-inspection-next aria-label="Next inspection bookings">
+                            <i class="bi bi-arrow-right"></i>
+                        </button>
                     </div>
                 </div>
-
-                <div>
-                    @foreach($inspectionBookings as $index => $booking)
-                        <div class="booking-card {{ $index === 0 ? 'active' : '' }}" id="booking-preview-{{ $booking->id }}">
-                            <div class="booking-top">
-                                <div>
-                                    <span class="badge" style="background:#dbeafe; color:#1e40af;">{{ $booking->status }}</span>
-                                    <h3 style="margin-top:10px; font-family:'Mukta Mahee', sans-serif;">Booking #{{ $booking->id }}</h3>
-                                </div>
-
-                                <i class="bi bi-search" style="font-size:32px; color:#2563eb;"></i>
-                            </div>
-
-                            <div class="booking-info">
-                                <p><strong>Customer:</strong> {{ $booking->customer->name ?? '-' }}</p>
-                                <p><strong>Phone:</strong> {{ $booking->customer->phone_number ?? '-' }}</p>
-                                <p><strong>Device:</strong> {{ $booking->device->name ?? '-' }} - {{ $booking->device->brand ?? '-' }}</p>
-                                <p><strong>Visit Date:</strong> {{ $booking->visit_date ?? '-' }}</p>
-                                <p><strong>Problem:</strong> {{ $booking->problem_description }}</p>
-                            </div>
-
-                            <hr style="margin:20px 0; border:none; border-top:1px solid #f1f5f9;">
-
-                            <form method="POST" action="{{ route('technician.bookings.inspection', $booking->id) }}">
-                                @csrf
-                                @method('PUT')
-
-                                <label style="margin-bottom: 6px; display: block; font-weight: 700; color:#111827;">Select Detected Repair Problem(s)</label>
-                                <p style="font-size:13px; color:#6b7280; margin-bottom:12px;">Check all issues that apply during diagnostic inspection.</p>
-                                
-                                @if($booking->device->repairs->count() > 0)
-                                    <div class="repair-options-grid">
-                                        @foreach($booking->device->repairs as $repair)
-                                            <label class="repair-option-card">
-                                                <input type="checkbox" name="repair_ids[]" value="{{ $repair->id }}" class="repair-checkbox">
-                                                <div class="repair-card-content">
-                                                    <div style="display:flex; justify-content: space-between; align-items: start;">
-                                                        <span class="repair-name">{{ $repair->repair_type }}</span>
-                                                        <div class="checkbox-indicator">
-                                                            <i class="bi bi-check-circle-fill"></i>
-                                                        </div>
-                                                    </div>
-                                                    <span class="repair-price">RM {{ number_format($repair->price, 2) }}</span>
-                                                </div>
-                                            </label>
-                                        @endforeach 
-                                    </div>
-                                @else
-                                    <p style="color: #ef4444; font-size: 14px; margin-bottom: 15px;">No repairs configured for this device.</p>
-                                @endif
-                                
-                                <button type="submit" class="btn btn-blue">
-                                    <i class="bi bi-file-earmark-check"></i> Submit Inspection Report
-                                </button>
-                            </form>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
+            @endif
         @endif
     </section>
 
@@ -586,7 +698,7 @@
                         <div>
                             <strong style="font-size: 14px;">
                                 <i class="bi bi-calendar-x" style="margin-right: 6px; color: #e65100;"></i>
-                                {{ \Carbon\Carbon::parse($availability->unavailable_date)->format('d M Y') }}
+                                {{ $availability->display_date_range }}
                             </strong>
                             <p style="font-size:12px; color:#8d6e63; margin-top:2px; margin-bottom:0;">
                                 {{ $availability->reason ?? 'No reason specified' }}
@@ -618,33 +730,49 @@
 </div>
 
 <script>
-document.querySelectorAll('.booking-list-item').forEach(button => {
-    button.addEventListener('click', function () {
-        const bookingId = this.getAttribute('data-booking-id');
+document.addEventListener('DOMContentLoaded', function () {
+    const cards = Array.from(document.querySelectorAll('[data-inspection-card]'));
+    const pager = document.querySelector('[data-inspection-pager]');
 
-        document.querySelectorAll('.booking-list-item').forEach(item => item.classList.remove('active'));
-        document.querySelectorAll('.booking-card').forEach(card => card.classList.remove('active'));
+    if (!pager || cards.length <= 4) {
+        return;
+    }
 
-        this.classList.add('active');
-        const preview = document.getElementById('booking-preview-' + bookingId);
-        if (preview) {
-            preview.classList.add('active');
+    const pageSize = 4;
+    let page = 0;
+    const totalPages = Math.ceil(cards.length / pageSize);
+    const prevButton = document.querySelector('[data-inspection-prev]');
+    const nextButton = document.querySelector('[data-inspection-next]');
+    const status = document.querySelector('[data-inspection-page-status]');
+
+    function renderInspectionPage() {
+        const start = page * pageSize;
+        const end = start + pageSize;
+
+        cards.forEach((card, index) => {
+            card.classList.toggle('is-hidden', index < start || index >= end);
+        });
+
+        prevButton.disabled = page === 0;
+        nextButton.disabled = page === totalPages - 1;
+        status.textContent = 'Showing ' + (start + 1) + '-' + Math.min(end, cards.length) + ' of ' + cards.length + ' assigned bookings';
+    }
+
+    prevButton.addEventListener('click', function () {
+        if (page > 0) {
+            page -= 1;
+            renderInspectionPage();
         }
     });
-});
 
-document.querySelectorAll('form').forEach(form => {
-    form.addEventListener('submit', function(e) {
-        const checkboxes = this.querySelectorAll('.repair-checkbox');
-        if (checkboxes.length > 0) {
-            let checked = false;
-            checkboxes.forEach(cb => { if (cb.checked) checked = true; });
-            if (!checked) {
-                e.preventDefault();
-                alert('Please select at least one repair problem before submitting.');
-            }
+    nextButton.addEventListener('click', function () {
+        if (page < totalPages - 1) {
+            page += 1;
+            renderInspectionPage();
         }
     });
+
+    renderInspectionPage();
 });
 </script>
 

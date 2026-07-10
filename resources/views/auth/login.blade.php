@@ -167,6 +167,41 @@
             transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
         }
 
+        .input-box.has-password-toggle input {
+            padding-right: 48px;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 38px;
+            height: 38px;
+            display: grid;
+            place-items: center;
+            border: 0;
+            border-radius: 9px;
+            color: #64748b;
+            background: transparent;
+            cursor: pointer;
+            transition: color .2s, background-color .2s;
+        }
+
+        .password-toggle i {
+            position: static;
+            transform: none;
+            color: inherit;
+            pointer-events: none;
+        }
+
+        .password-toggle:hover,
+        .password-toggle:focus-visible {
+            color: #15985a;
+            background: #e7f8ef;
+            outline: none;
+        }
+
         .input-box input:focus {
             border-color: #22c55e;
             background-color: white;
@@ -269,6 +304,51 @@
             font-weight: 500;
         }
 
+        .auth-toast {
+            position: fixed;
+            top: 22px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10000;
+            width: min(460px, calc(100% - 32px));
+            padding: 14px 18px;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            line-height: 1.45;
+            box-shadow: 0 16px 36px rgba(15, 23, 42, .22);
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            animation: authToastIn .25s ease-out both;
+        }
+
+        .auth-toast.success {
+            background: #16a34a;
+        }
+
+        .auth-toast.error {
+            background: #dc2626;
+        }
+
+        .auth-toast i {
+            font-size: 18px;
+            line-height: 1.4;
+            flex-shrink: 0;
+        }
+
+        @keyframes authToastIn {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
         .hide {
             display: none !important;
         }
@@ -356,19 +436,33 @@
         }
 
         .auth-bg {
-            background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 58%, #16a34a 100%);
+            background:
+                radial-gradient(circle at 82% 18%, rgba(79, 127, 232, .17), transparent 32%),
+                radial-gradient(circle at 18% 82%, rgba(53, 189, 120, .16), transparent 30%),
+                linear-gradient(135deg, #fbfefd 0%, #edf6ff 55%, #f2fbf6 100%);
             padding: clamp(22px, 5vw, 48px);
         }
 
         .auth-card {
             width: min(1000px, 100%);
-            border: 1px solid rgba(255, 255, 255, .32);
+            border: 1px solid #d6e2ee;
             border-radius: 22px;
-            box-shadow: 0 28px 70px rgba(15, 23, 42, .28);
+            box-shadow: 0 28px 70px rgba(61, 82, 112, .18);
         }
 
         .auth-left {
-            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+            color: #172033;
+            background: linear-gradient(145deg, #eaf3ff 0%, #f4fbff 52%, #e9faef 100%);
+            border-right: 1px solid #dfe8f2;
+        }
+
+        .auth-left::before {
+            background: radial-gradient(circle at 80% 20%, rgba(53, 189, 120, .16) 0%, transparent 52%);
+        }
+
+        .brand-info .logo,
+        .welcome-section h1 {
+            color: #172033;
         }
 
         .brand-info .logo {
@@ -386,7 +480,7 @@
         }
 
         .welcome-section p {
-            color: #dbeafe;
+            color: #5f7189;
         }
 
         .auth-form-container h2 {
@@ -400,7 +494,11 @@
         }
 
         .feature-tag {
-            color: #e0f2fe;
+            color: #3a5878;
+        }
+
+        .feature-tag i {
+            color: #15985a;
         }
 
         .input-box input {
@@ -468,6 +566,18 @@
     </style>
 </head>
 <body>
+
+@if(session('success'))
+    <div class="auth-toast success" id="authToast">
+        <i class="bi bi-check-circle-fill"></i>
+        <span>{{ session('success') }}</span>
+    </div>
+@elseif($errors->any())
+    <div class="auth-toast error" id="authToast">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <span>{{ $errors->first() }}</span>
+    </div>
+@endif
 
 <section class="auth-bg">
 
@@ -547,9 +657,12 @@
                             <input type="email" name="email" placeholder="Email Address" required>
                         </div>
 
-                        <div class="input-box">
+                        <div class="input-box has-password-toggle">
                             <i class="bi bi-lock"></i>
                             <input type="password" name="password" placeholder="Password" required>
+                            <button type="button" class="password-toggle" aria-label="Show password" aria-pressed="false" title="Show password">
+                                <i class="bi bi-eye"></i>
+                            </button>
                         </div>
 
                         <button type="submit" class="login-btn">
@@ -591,14 +704,20 @@
                                 <input type="text" name="phone_number" placeholder="Phone Number (e.g. 601234567890)" maxlength="11" pattern="[0-9]{1,11}" title="Phone number must be between 1 and 11 digits containing only numbers" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                             </div>
 
-                            <div class="input-box">
+                            <div class="input-box has-password-toggle">
                                 <i class="bi bi-lock"></i>
                                 <input type="password" name="password" placeholder="Password" required>
+                                <button type="button" class="password-toggle" aria-label="Show password" aria-pressed="false" title="Show password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
                             </div>
 
-                            <div class="input-box">
+                            <div class="input-box has-password-toggle">
                                 <i class="bi bi-shield-lock"></i>
                                 <input type="password" name="password_confirmation" placeholder="Confirm Password" required>
+                                <button type="button" class="password-toggle" aria-label="Show password" aria-pressed="false" title="Show password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
                             </div>
 
                             <button type="submit" class="login-btn">
@@ -629,6 +748,36 @@ function showLogin(){
     document.getElementById('registerForm').classList.add('hide');
     document.getElementById('loginForm').classList.remove('hide');
 }
+
+document.addEventListener('DOMContentLoaded', function(){
+    document.querySelectorAll('.password-toggle').forEach(function(button){
+        button.addEventListener('click', function(){
+            const input = button.parentElement.querySelector('input');
+            const isVisible = input.type === 'text';
+            input.type = isVisible ? 'password' : 'text';
+            button.setAttribute('aria-label', isVisible ? 'Show password' : 'Hide password');
+            button.setAttribute('aria-pressed', String(!isVisible));
+            button.setAttribute('title', isVisible ? 'Show password' : 'Hide password');
+            button.querySelector('i').className = isVisible ? 'bi bi-eye' : 'bi bi-eye-slash';
+        });
+    });
+
+    const toast = document.getElementById('authToast');
+    if(toast) {
+        setTimeout(function(){
+            toast.style.transition = 'opacity .35s ease, transform .35s ease';
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(-50%) translateY(-12px)';
+            setTimeout(function(){ toast.remove(); }, 350);
+        }, 4200);
+    }
+
+    @if($errors->has('name') || $errors->has('phone_number') || $errors->has('password') || old('name') || old('phone_number'))
+        if(document.getElementById('registerForm')) {
+            showRegister();
+        }
+    @endif
+});
 </script>
 
 </body>

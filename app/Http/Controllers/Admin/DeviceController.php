@@ -71,10 +71,16 @@ class DeviceController extends Controller
 
     public function destroy(Device $device)
     {
-        $device->delete();
+        $device->update([
+            'is_active' => ! $device->is_active,
+        ]);
+
+        $message = $device->is_active
+            ? 'Device activated successfully.'
+            : 'Device deactivated successfully.';
 
         return redirect()
             ->route('admin.devices')
-            ->with('delete', 'Device deleted successfully.');
+            ->with('delete', $message);
     }
 }

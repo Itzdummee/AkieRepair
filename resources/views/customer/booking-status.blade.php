@@ -233,6 +233,7 @@
                     <th>Device</th>
                     <th>Submitted</th>
                     <th>Visit Date</th>
+                    <th>Finished Date</th>
                     <th>Technician</th>
                     <th>Status</th>
                     <th style="text-align:center;">Action</th>
@@ -272,6 +273,7 @@
                         </td>
                         <td>{{ $booking->created_at->format('d M Y') }}</td>
                         <td>{{ $booking->visit_date ? \Carbon\Carbon::parse($booking->visit_date)->format('d M Y') : '-' }}</td>
+                        <td>{{ $booking->repair_finished_date ? \Carbon\Carbon::parse($booking->repair_finished_date)->format('d M Y') : '-' }}</td>
                         <td>{{ $booking->technician->name ?? 'Not assigned yet' }}</td>
                         <td>
                             <span class="status-badge {{ $cls }}">

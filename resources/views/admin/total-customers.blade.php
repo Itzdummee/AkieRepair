@@ -660,7 +660,9 @@
                                 @php
                                     $badgeClass = 'status-pending';
                                     $iconClass = 'bi-circle-fill';
-                                    if ($customer->approval_status === 'approved') {
+                                    if (! $customer->is_active) {
+                                        $badgeClass = 'status-rejected';
+                                    } elseif ($customer->approval_status === 'approved') {
                                         $badgeClass = 'status-approved';
                                     } elseif ($customer->approval_status === 'rejected') {
                                         $badgeClass = 'status-rejected';
@@ -668,7 +670,7 @@
                                 @endphp
                                 <span class="status-badge-pill {{ $badgeClass }}">
                                     <i class="bi {{ $iconClass }}"></i>
-                                    {{ $customer->approval_status }}
+                                    {{ $customer->is_active ? $customer->approval_status : 'deactivated' }}
                                 </span>
                             </td>
                             
@@ -689,12 +691,11 @@
                                         <!-- <span>Edit</span> -->
                                     </button>
 
-                                    <form method="POST" action="{{ route('admin.customers.destroy', $customer->id) }}" style="margin: 0;" onsubmit="return confirm('Are you sure you want to delete customer {{ $customer->name }} permanently? This will remove all their system associations.')">
+                                    <form method="POST" action="{{ route('admin.customers.destroy', $customer->id) }}" style="margin: 0;" onsubmit="return confirm('{{ $customer->is_active ? 'Deactivate' : 'Activate' }} customer {{ $customer->name }}?')">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn-action-small btn-delete">
-                                            <i class="bi bi-trash-fill"></i>
-                                            <!-- <span>Delete</span> -->
+                                        <button type="submit" class="btn-action-small btn-delete" title="{{ $customer->is_active ? 'Deactivate Customer' : 'Activate Customer' }}">
+                                            <i class="bi {{ $customer->is_active ? 'bi-pause-circle-fill' : 'bi-play-circle-fill' }}"></i>
                                         </button>
                                     </form>
                                 </div>
@@ -798,6 +799,7 @@
         $('#customerRegistryTable').DataTable({
             pageLength: 10,
             lengthMenu: [5, 10, 25, 50],
+            order: [[0, 'desc']],
             ordering: true,
             searching: true,
             language: {

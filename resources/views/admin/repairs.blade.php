@@ -694,7 +694,9 @@
                             </div>
                             <div class="service-card-details">
                                 <span class="service-card-name">{{ $service->service_type }}</span>
-                                <span class="service-card-subtitle">{{ $service->repairs->count() }} repairs registered</span>
+                                <span class="service-card-subtitle">
+                                    {{ $service->repairs->count() }} repairs registered · {{ $service->is_active ? 'Active' : 'Inactive' }}
+                                </span>
                             </div>
                         </div>
 
@@ -710,11 +712,11 @@
                                 <i class="bi bi-pencil-square"></i>
                             </button>
 
-                            <form method="POST" action="{{ route('admin.services.destroy', $service->id) }}" style="margin: 0;" onsubmit="return confirm('Are you sure you want to delete service category \'{{ $service->service_type }}\'? All associated repair price records will be deleted as well.')">
+                            <form method="POST" action="{{ route('admin.services.destroy', $service->id) }}" style="margin: 0;" onsubmit="return confirm('{{ $service->is_active ? 'Deactivate' : 'Activate' }} service category \'{{ $service->service_type }}\'?')">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn-action-icon btn-delete" title="Delete Service Category">
-                                    <i class="bi bi-trash-fill"></i>
+                                <button type="submit" class="btn-action-icon btn-delete" title="{{ $service->is_active ? 'Deactivate Service Category' : 'Activate Service Category' }}">
+                                    <i class="bi {{ $service->is_active ? 'bi-pause-circle-fill' : 'bi-play-circle-fill' }}"></i>
                                 </button>
                             </form>
                         </div>
@@ -751,6 +753,7 @@
                                 <th>Applicable Device</th>
                                 <th style="text-align: right; width: 100px;">Base Price</th>
                                 <th style="text-align: center; width: 140px;">Warranty & Time</th>
+                                <th style="text-align: center; width: 100px;">Status</th>
                                 <th style="width: 100px; text-align: center;">Actions</th>
                             </tr>
                         </thead>
@@ -805,6 +808,12 @@
                                             </span>
                                         </div>
                                     </td>
+
+                                    <td style="text-align: center;">
+                                        <span class="type-badge-pill" style="border: 1px solid {{ $repair->is_active ? '#d1fae5' : '#fee2e2' }}; background: {{ $repair->is_active ? '#ecfdf5' : '#fef2f2' }}; color: {{ $repair->is_active ? '#065f46' : '#991b1b' }};">
+                                            {{ $repair->is_active ? 'Active' : 'Inactive' }}
+                                        </span>
+                                    </td>
                                     
                                     <!-- Action buttons -->
                                     <td>
@@ -827,11 +836,11 @@
                                                 <i class="bi bi-pencil-square"></i>
                                             </button>
 
-                                            <form method="POST" action="{{ route('admin.repairs.destroy', $repair->id) }}" style="margin: 0;" onsubmit="return confirm('Are you sure you want to delete this repair pricing record?')">
+                                            <form method="POST" action="{{ route('admin.repairs.destroy', $repair->id) }}" style="margin: 0;" onsubmit="return confirm('{{ $repair->is_active ? 'Deactivate' : 'Activate' }} this repair pricing record?')">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="btn-action-icon btn-delete" title="Delete Repair pricing">
-                                                    <i class="bi bi-trash-fill"></i>
+                                                <button type="submit" class="btn-action-icon btn-delete" title="{{ $repair->is_active ? 'Deactivate Repair Pricing' : 'Activate Repair Pricing' }}">
+                                                    <i class="bi {{ $repair->is_active ? 'bi-pause-circle-fill' : 'bi-play-circle-fill' }}"></i>
                                                 </button>
                                             </form>
                                         </div>
@@ -902,7 +911,9 @@
                 <select name="service_id" id="rep_service_id" class="form-control" required>
                     <option value="">Select Service Category</option>
                     @foreach($services as $service)
-                        <option value="{{ $service->id }}">{{ $service->service_type }}</option>
+                        <option value="{{ $service->id }}">
+                            {{ $service->service_type }}{{ $service->is_active ? '' : ' (Inactive)' }}
+                        </option>
                     @endforeach
                 </select>
             </div>
@@ -913,7 +924,9 @@
                 <select name="device_id" id="rep_device_id" class="form-control" required>
                     <option value="">Select Device Model</option>
                     @foreach($devices as $device)
-                        <option value="{{ $device->id }}">{{ $device->name }} - {{ $device->brand }} ({{ $device->type }})</option>
+                        <option value="{{ $device->id }}">
+                            {{ $device->name }} - {{ $device->brand }} ({{ $device->type }}){{ $device->is_active ? '' : ' (Inactive)' }}
+                        </option>
                     @endforeach
                 </select>
             </div>
@@ -1002,6 +1015,7 @@
         $('#repairPricingTable').DataTable({
             pageLength: 10,
             lengthMenu: [5, 10, 25, 50],
+            order: [],
             ordering: true,
             searching: true,
             language: {

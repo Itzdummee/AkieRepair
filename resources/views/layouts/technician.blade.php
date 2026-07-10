@@ -206,6 +206,18 @@
             padding:40px;
         }
 
+        .sidebar,.main{transition:width .25s ease,margin-left .25s ease,padding .25s ease}
+        .sidebar-minimize-toggle{position:absolute;top:8px;right:8px;width:30px;height:30px;padding:0;border:1px solid #e2e8f0;border-radius:50%;background:#fff;color:#334155;display:grid;place-items:center;cursor:pointer;box-shadow:0 4px 12px rgba(15,23,42,.12);z-index:3}
+        .tech-wrapper.sidebar-minimized .sidebar{width:84px;padding-left:14px;padding-right:14px}
+        .tech-wrapper.sidebar-minimized .main{margin-left:84px;width:calc(100% - 84px)}
+        .tech-wrapper.sidebar-minimized .brand-box{justify-content:center;margin-top:20px}
+        .tech-wrapper.sidebar-minimized .brand-box>div:last-child,.tech-wrapper.sidebar-minimized .user-text,.tech-wrapper.sidebar-minimized .logout-icon,.tech-wrapper.sidebar-minimized .badge-notify{display:none!important}
+        .tech-wrapper.sidebar-minimized .menu a{justify-content:center!important;padding-left:8px;padding-right:8px;font-size:0;border-left:0}
+        .tech-wrapper.sidebar-minimized .menu a>span:first-child{width:100%;justify-content:center;gap:0!important}
+        .tech-wrapper.sidebar-minimized .menu a i{font-size:18px;display:grid;place-items:center;margin:0 auto}
+        .tech-wrapper.sidebar-minimized .user-row{justify-content:center}
+        .tech-wrapper.sidebar-minimized .avatar{width:42px;height:42px}
+
         .success {
             background:#eafff3;
             border:1px solid #bbf7d0;
@@ -229,6 +241,7 @@
         }
 
         @media(max-width:900px){
+            .sidebar-minimize-toggle{display:none}
             .sidebar{
                 position:relative;
                 width:100%;
@@ -651,6 +664,7 @@
     <button type="button" class="mobile-nav-backdrop" data-panel-close="tech-wrapper" aria-label="Close technician navigation"></button>
 
     <aside class="sidebar">
+        <button type="button" class="sidebar-minimize-toggle" id="techSidebarMinimizeToggle" aria-label="Minimize sidebar" aria-expanded="true" title="Minimize sidebar"><i class="bi bi-list"></i></button>
         <button type="button" class="mobile-nav-close" data-panel-close="tech-wrapper" aria-label="Close technician navigation">
             <i class="bi bi-x-lg"></i>
         </button>
@@ -729,9 +743,11 @@
                 --ui-muted:#64748b;
                 --ui-soft:#f8fafc;
                 --ui-line:#e2e8f0;
-                --ui-accent:#16a34a;
+                --ui-accent:#0f5132;
+                --ui-accent-2:#16a34a;
                 --ui-blue:#2563eb;
                 --ui-shadow:0 16px 40px rgba(15, 23, 42, .07);
+                --ui-header:linear-gradient(135deg, #0f5132, #145c45);
             }
 
             html{
@@ -746,6 +762,16 @@
                 line-height:1.65;
             }
 
+            h1,
+            h2,
+            h3,
+            h4,
+            h5,
+            h6{
+                font-family:'Mukta Mahee', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+                letter-spacing:0 !important;
+            }
+
             .main{
                 background:var(--ui-bg);
             }
@@ -756,8 +782,10 @@
             }
 
             .brand-icon,
-            .avatar{
-                background:linear-gradient(135deg, #0f172a, #2563eb) !important;
+            .avatar,
+            .modern-header .icon-wrapper,
+            .inspection-icon{
+                background:linear-gradient(135deg, #34d399, #0f5132) !important;
             }
 
             .brand-box h3,
@@ -772,8 +800,8 @@
 
             .menu a:hover,
             .menu a.active{
-                background:#eef6ff !important;
-                color:#0f172a !important;
+                background:#ecfdf5 !important;
+                color:var(--ui-accent) !important;
             }
 
             .mobile-shellbar{
@@ -783,31 +811,101 @@
                 backdrop-filter:blur(14px);
             }
 
-            :where(.modern-header .header-title, .page-title, .section-title, .panel-title, .card-title){
+            :where(.modern-header .header-title, .inspection-header h1, .page-title, .section-title, .panel-title, .card-title){
                 font-family:'Mukta Mahee', system-ui, sans-serif !important;
-                color:var(--ui-text) !important;
                 font-size:clamp(1.7rem, 2.5vw, 2.45rem) !important;
                 font-weight:800 !important;
                 letter-spacing:0 !important;
                 line-height:1.12 !important;
             }
 
-            :where(.modern-header p, .section-subtitle, .panel-subtitle){
+            :where(.modern-header .header-title, .inspection-header h1){
+                color:#ffffff !important;
+            }
+
+            :where(.modern-header p, .inspection-header p){
+                color:#d1fae5 !important;
+                font-size:clamp(.98rem, 1.1vw, 1.08rem) !important;
+                line-height:1.6 !important;
+            }
+
+            :where(.section-subtitle, .panel-subtitle){
                 color:var(--ui-muted) !important;
                 font-size:clamp(.98rem, 1.1vw, 1.08rem) !important;
                 line-height:1.6 !important;
             }
 
-            :where(.modern-header, .panel, .add-card, .availability-section, .detail-card, .booking-card, .job-card, .modal){
+            :where(.modern-header, .inspection-header){
+                background:var(--ui-header) !important;
+                color:#ffffff !important;
+                border:0 !important;
+                border-radius:18px !important;
+                box-shadow:var(--ui-shadow) !important;
+            }
+
+            :where(.panel, .inspection-panel, .add-card, .availability-section, .detail-card, .booking-card, .job-card, .modal){
                 background:var(--ui-surface) !important;
                 border:1px solid var(--ui-line) !important;
                 border-radius:14px !important;
                 box-shadow:var(--ui-shadow) !important;
             }
 
-            :where(.stat-card, .job-stat-card, .summary-card, .info-card){
+            :where(.stat-card, .jobs-stat-card, .job-stat-card, .summary-card, .info-card, .assigned-booking-card, .unavailable-card){
                 border-radius:14px !important;
                 box-shadow:0 12px 32px rgba(15, 23, 42, .055) !important;
+            }
+
+            :where(.panel h2, .section-header h2, .detail-card-header h3, .booking-main-title h1, .inspection-panel h2){
+                color:var(--ui-text) !important;
+                font-size:1.35rem !important;
+                font-weight:800 !important;
+                line-height:1.2 !important;
+            }
+
+            :where(.stat-card p, .jobs-stat-card p, .info-label, label){
+                color:var(--ui-muted) !important;
+                font-size:.78rem !important;
+                font-weight:800 !important;
+                letter-spacing:.04em !important;
+                text-transform:uppercase !important;
+            }
+
+            :where(.stat-card h3, .jobs-stat-card h3, .quote-total){
+                color:var(--ui-text) !important;
+                font-family:'Mukta Mahee', system-ui, sans-serif !important;
+                font-size:2rem !important;
+                font-weight:800 !important;
+                line-height:1.1 !important;
+            }
+
+            :where(.stat-icon.green, .jobs-stat-icon.completed, .btn-green, .btn-blue, .btn-primary, .btn-submit, .btn-save, .btn-job-submit){
+                background:var(--ui-accent-2) !important;
+                color:#ffffff !important;
+                border-color:var(--ui-accent-2) !important;
+            }
+
+            :where(.stat-card.green::after, .jobs-stat-card.completed::after){
+                background:var(--ui-accent-2) !important;
+            }
+
+            :where(.stat-icon.blue, .stat-icon.purple, .jobs-stat-icon.active, .assigned-booking-icon, .panel-title span){
+                background:#ecfdf5 !important;
+                color:var(--ui-accent) !important;
+            }
+
+            :where(.stat-card.blue::after, .stat-card.purple::after, .jobs-stat-card.active::after, .assigned-booking-card::before){
+                background:var(--ui-accent) !important;
+            }
+
+            :where(.btn-view-detail, .edit-btn, .back-link){
+                background:#ecfdf5 !important;
+                color:var(--ui-accent) !important;
+                border-color:#bbf7d0 !important;
+            }
+
+            :where(.problem-box.purple){
+                background:#ecfdf5 !important;
+                border-left-color:var(--ui-accent) !important;
             }
 
             :where(.btn, .btn-view-detail, .btn-job-submit, .btn-primary, .edit-btn, .delete-btn, .btn-save, .btn-secondary, .back-btn):not(.mobile-nav-toggle):not(.mobile-nav-close):not(.logout-icon){
@@ -834,7 +932,7 @@
 
             :where(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]), select, textarea):focus{
                 border-color:var(--ui-accent) !important;
-                box-shadow:0 0 0 4px rgba(22, 163, 74, .12) !important;
+                box-shadow:0 0 0 4px rgba(15, 81, 50, .12) !important;
                 background:#fff;
             }
 
@@ -1036,6 +1134,15 @@
 </div>
 
 <script>
+    (function(){
+        const wrapper=document.querySelector('.tech-wrapper');
+        const toggle=document.getElementById('techSidebarMinimizeToggle');
+        if(!wrapper||!toggle)return;
+        function applyState(minimized){wrapper.classList.toggle('sidebar-minimized',minimized);toggle.setAttribute('aria-expanded',minimized?'false':'true');toggle.setAttribute('aria-label',minimized?'Expand sidebar':'Minimize sidebar');toggle.title=minimized?'Expand sidebar':'Minimize sidebar'}
+        applyState(localStorage.getItem('techSidebarMinimized')==='true');
+        toggle.addEventListener('click',function(){const minimized=!wrapper.classList.contains('sidebar-minimized');applyState(minimized);localStorage.setItem('techSidebarMinimized',minimized?'true':'false')});
+    })();
+
     function setPanelNav(wrapperClass, shouldOpen){
         const wrapper = document.querySelector('.' + wrapperClass);
         if(!wrapper) return;

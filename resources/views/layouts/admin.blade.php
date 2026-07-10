@@ -200,7 +200,9 @@
         }
 
         .menu-link:hover,
-        .dropdown-btn:hover{
+        .dropdown-btn:hover,
+        .menu-link.active,
+        .dropdown-btn.active{
             background:#f3f4f6;
             color:#000;
         }
@@ -332,6 +334,95 @@
         .main-content{
             margin-left:285px;
             width:calc(100% - 285px);
+        }
+
+        /* Desktop sidebar minimizer */
+        .sidebar,
+        .main-content{
+            transition:width .25s ease, margin-left .25s ease, padding .25s ease;
+        }
+
+        .sidebar-minimize-toggle{
+            position:absolute;
+            top:8px;
+            right:8px;
+            width:30px;
+            height:30px;
+            padding:0;
+            border:1px solid #e2e8f0;
+            border-radius:50%;
+            background:#fff;
+            color:#334155;
+            display:grid;
+            place-items:center;
+            cursor:pointer;
+            box-shadow:0 4px 12px rgba(15,23,42,.12);
+            z-index:3;
+        }
+
+        .sidebar-minimize-toggle:hover{
+            background:#f8fafc;
+            color:#0f172a;
+        }
+
+        .admin-wrapper.sidebar-minimized .sidebar{
+            width:84px;
+            padding-left:14px;
+            padding-right:14px;
+        }
+
+        .admin-wrapper.sidebar-minimized .main-content{
+            margin-left:99px;
+            width:calc(100% - 99px);
+        }
+
+        .admin-wrapper.sidebar-minimized .brand-box{
+            justify-content:center;
+            margin-top:20px;
+        }
+
+        .admin-wrapper.sidebar-minimized .brand-box > div:last-child,
+        .admin-wrapper.sidebar-minimized .dropdown-btn > span:last-child,
+        .admin-wrapper.sidebar-minimized .submenu,
+        .admin-wrapper.sidebar-minimized .user-text,
+        .admin-wrapper.sidebar-minimized .logout-icon{
+            display:none !important;
+        }
+
+        .admin-wrapper.sidebar-minimized .menu-link,
+        .admin-wrapper.sidebar-minimized .dropdown-btn{
+            justify-content:center;
+            padding-left:8px;
+            padding-right:8px;
+            font-size:0;
+        }
+
+        .admin-wrapper.sidebar-minimized .menu-left{
+            width:100%;
+            justify-content:center;
+            gap:0;
+        }
+
+        .admin-wrapper.sidebar-minimized .menu-left .icon{
+            font-size:18px;
+            display:grid;
+            place-items:center;
+            margin:0 auto;
+        }
+
+        .admin-wrapper.sidebar-minimized .user-row{
+            justify-content:center;
+        }
+
+        .admin-wrapper.sidebar-minimized .avatar{
+            width:42px;
+            height:42px;
+        }
+
+        .admin-wrapper.sidebar-minimized .badge-dot-header{display:none}
+
+        .admin-wrapper.sidebar-minimized .sidebar-minimize-toggle i{
+            transform:rotate(180deg);
         }
 
         .page-content{
@@ -499,6 +590,10 @@
         .delete-popup{background:#dc2626}
 
         @media(max-width:900px){
+            .sidebar-minimize-toggle{
+                display:none;
+            }
+
             .sidebar{
                 position:relative;
                 width:100%;
@@ -1128,6 +1223,9 @@
     <button type="button" class="mobile-nav-backdrop" data-panel-close="admin-wrapper" aria-label="Close admin navigation"></button>
 
     <aside class="sidebar">
+        <button type="button" class="sidebar-minimize-toggle" id="sidebarMinimizeToggle" aria-label="Minimize sidebar" aria-expanded="true" title="Minimize sidebar">
+            <i class="bi bi-list"></i>
+        </button>
         <button type="button" class="mobile-nav-close" data-panel-close="admin-wrapper" aria-label="Close admin navigation">
             <i class="bi bi-x-lg"></i>
         </button>
@@ -1142,7 +1240,7 @@
             </div>
 
             <div class="menu-section">
-                <a href="{{ route('admin.dashboard') }}" class="menu-link">
+                <a href="{{ route('admin.dashboard') }}" class="menu-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                     <span class="menu-left">
                         <span class="icon"><i class="bi bi-grid"></i></span>
                         Dashboard
@@ -1151,7 +1249,7 @@
             </div>
 
             <div class="menu-section">
-                <button class="dropdown-btn" onclick="toggleMenu('serviceMenu')">
+                <button class="dropdown-btn {{ request()->routeIs('admin.repairs', 'admin.services', 'admin.devices') ? 'active' : '' }}" onclick="toggleMenu('serviceMenu')">
                     <span class="menu-left">
                         <span class="icon">▣</span>
                         Service
@@ -1159,14 +1257,14 @@
                     <span>⌄</span>
                 </button>
 
-                <div id="serviceMenu" class="submenu">
-                    <a href="{{ route('admin.repairs') }}">Repair Prices</a>
-                    <a href="{{ route('admin.devices') }}">Devices</a>
+                <div id="serviceMenu" class="submenu {{ request()->routeIs('admin.repairs', 'admin.services', 'admin.devices') ? 'show' : '' }}">
+                    <a href="{{ route('admin.repairs') }}" class="{{ request()->routeIs('admin.repairs', 'admin.services') ? 'active' : '' }}">Repair Prices</a>
+                    <a href="{{ route('admin.devices') }}" class="{{ request()->routeIs('admin.devices') ? 'active' : '' }}">Devices</a>
                 </div>
             </div>
 
             <div class="menu-section">
-                <button class="dropdown-btn" onclick="toggleMenu('customerMenu')" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <button class="dropdown-btn {{ request()->routeIs('admin.customers.*') ? 'active' : '' }}" onclick="toggleMenu('customerMenu')" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                     <span class="menu-left">
                         <span class="icon">◎</span>
                         Customer
@@ -1177,19 +1275,19 @@
                     <span>⌄</span>
                 </button>
 
-                <div id="customerMenu" class="submenu">
-                    <a href="{{ route('admin.customers.pending') }}" style="display: flex; justify-content: space-between; align-items: center;">
+                <div id="customerMenu" class="submenu {{ request()->routeIs('admin.customers.*') ? 'show' : '' }}">
+                    <a href="{{ route('admin.customers.pending') }}" class="{{ request()->routeIs('admin.customers.pending') ? 'active' : '' }}" style="display: flex; justify-content: space-between; align-items: center;">
                         <span>Pending Customer</span>
                         @if(isset($pendingCustomersCount) && $pendingCustomersCount > 0)
                             <span class="badge-notify">{{ $pendingCustomersCount }}</span>
                         @endif
                     </a>
-                    <a href="{{ route('admin.customers.index') }}">Total Customer</a>
+                    <a href="{{ route('admin.customers.index') }}" class="{{ request()->routeIs('admin.customers.index') ? 'active' : '' }}">Total Customer</a>
                 </div>
             </div>
 
             <div class="menu-section">
-                <button class="dropdown-btn" onclick="toggleMenu('bookingMenu')" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <button class="dropdown-btn {{ request()->routeIs('admin.bookings.*') ? 'active' : '' }}" onclick="toggleMenu('bookingMenu')" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                     <span class="menu-left">
                         <span class="icon">▤</span>
                         Booking
@@ -1200,25 +1298,25 @@
                     <span>⌄</span>
                 </button>
 
-                <div id="bookingMenu" class="submenu">
-                    <a href="{{ route('admin.bookings.pending') }}" style="display: flex; justify-content: space-between; align-items: center;">
+                <div id="bookingMenu" class="submenu {{ request()->routeIs('admin.bookings.*') ? 'show' : '' }}">
+                    <a href="{{ route('admin.bookings.pending') }}" class="{{ request()->routeIs('admin.bookings.pending') ? 'active' : '' }}" style="display: flex; justify-content: space-between; align-items: center;">
                         <span>Pending Booking</span>
                         @if(isset($pendingBookingsCount) && $pendingBookingsCount > 0)
                             <span class="badge-notify">{{ $pendingBookingsCount }}</span>
                         @endif
                     </a>
-                    <a href="{{ route('admin.bookings.quotation') }}" style="display: flex; justify-content: space-between; align-items: center;">
+                    <a href="{{ route('admin.bookings.quotation') }}" class="{{ request()->routeIs('admin.bookings.quotation', 'admin.bookings.quotation.pdf') ? 'active' : '' }}" style="display: flex; justify-content: space-between; align-items: center;">
                         <span>Quotation</span>
                         @if(isset($pendingQuotationsCount) && $pendingQuotationsCount > 0)
                             <span class="badge-notify">{{ $pendingQuotationsCount }}</span>
                         @endif
                     </a>
-                    <a href="{{ route('admin.bookings.history') }}">Booking History</a>
+                    <a href="{{ route('admin.bookings.history') }}" class="{{ request()->routeIs('admin.bookings.history') ? 'active' : '' }}">Booking History</a>
                 </div>
             </div>
 
             <div class="menu-section">
-                <a href="{{ route('admin.technicians') }}" class="menu-link">
+                <a href="{{ route('admin.technicians') }}" class="menu-link {{ request()->routeIs('admin.technicians') ? 'active' : '' }}">
                     <span class="menu-left">
                         <span class="icon">⚙</span>
                         Technician
@@ -1257,13 +1355,17 @@
                     --ui-bg:#f4f6f9;
                     --ui-surface:#ffffff;
                     --ui-text:#0f172a;
+                    --ui-heading:#111827;
                     --ui-muted:#64748b;
                     --ui-soft:#f8fafc;
                     --ui-line:#e2e8f0;
+                    --ui-primary:#1d4ed8;
                     --ui-accent:#16a34a;
                     --ui-blue:#2563eb;
                     --ui-red:#dc2626;
+                    --ui-warning:#d97706;
                     --ui-shadow:0 16px 40px rgba(15, 23, 42, .07);
+                    --ui-font:'Mukta Mahee', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
                 }
 
                 html{
@@ -1271,11 +1373,50 @@
                 }
 
                 body{
-                    font-family:'Mukta Mahee', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+                    font-family:var(--ui-font) !important;
                     background:var(--ui-bg) !important;
                     color:var(--ui-text);
                     font-size:16px;
                     line-height:1.65;
+                }
+
+                .admin-wrapper :where(:not(i):not(.bi)){
+                    font-family:var(--ui-font) !important;
+                }
+
+                .page-content :where(h1, h2, h3, h4, h5, h6),
+                .sidebar :where(h1, h2, h3, h4, h5, h6){
+                    color:var(--ui-heading) !important;
+                    font-family:var(--ui-font) !important;
+                    font-weight:800 !important;
+                    letter-spacing:0 !important;
+                    line-height:1.18 !important;
+                }
+
+                .page-content h1{
+                    font-size:clamp(1.9rem, 2.6vw, 2.55rem) !important;
+                }
+
+                .page-content h2{
+                    font-size:clamp(1.45rem, 2vw, 1.9rem) !important;
+                }
+
+                .page-content h3{
+                    font-size:clamp(1.15rem, 1.45vw, 1.35rem) !important;
+                }
+
+                .page-content h4,
+                .page-content h5,
+                .page-content h6{
+                    font-size:1rem !important;
+                }
+
+                .page-content :where(p, li, td, th, label, input, select, textarea, button, a, span, small){
+                    letter-spacing:0;
+                }
+
+                .page-content :where(p, li, small){
+                    color:var(--ui-muted);
                 }
 
                 .main-content,
@@ -1306,6 +1447,7 @@
                 .menu-link,
                 .dropdown-btn,
                 .submenu a{
+                    color:#334155 !important;
                     letter-spacing:0;
                     transition:background-color .18s ease, color .18s ease, transform .18s ease;
                 }
@@ -1326,8 +1468,8 @@
                     backdrop-filter:blur(14px);
                 }
 
-                :where(.page-title, .dashboard-header h1, .dev-title h1, .cust-title h1, .rep-title h1, .pending-cust-title h1, .pending-title-area h1, .quote-title-area h1, .history-title-area h1, .pro-card-title, .column-title){
-                    font-family:'Mukta Mahee', system-ui, sans-serif !important;
+                :where(.page-title, .dashboard-header h1, .dev-title h1, .cust-title h1, .rep-title h1, .pending-cust-title h1, .pending-title h1, .pending-title-area h1, .quote-title-area h1, .history-title-area h1, .pro-card-title, .column-title){
+                    font-family:var(--ui-font) !important;
                     color:var(--ui-text) !important;
                     font-size:clamp(1.8rem, 2.5vw, 2.55rem) !important;
                     font-weight:800 !important;
@@ -1335,32 +1477,52 @@
                     line-height:1.12 !important;
                 }
 
-                :where(.dashboard-header p, .dev-title p, .cust-title p, .rep-title p, .pending-cust-title p, .pending-title-area p, .quote-title-area p, .history-title-area p){
+                :where(.section-title, .modal-title, .service-card-name){
+                    color:var(--ui-heading) !important;
+                    font-family:var(--ui-font) !important;
+                    font-size:clamp(1.05rem, 1.3vw, 1.25rem) !important;
+                    font-weight:800 !important;
+                    letter-spacing:0 !important;
+                    line-height:1.25 !important;
+                }
+
+                :where(.dashboard-header p, .dev-title p, .cust-title p, .rep-title p, .pending-cust-title p, .pending-title p, .pending-title-area p, .quote-title-area p, .history-title-area p){
                     color:var(--ui-muted) !important;
                     font-size:clamp(.98rem, 1.1vw, 1.08rem) !important;
                     line-height:1.6 !important;
                 }
 
-                :where(.panel, .pro-card, .dev-table-panel, .cust-table-panel, .rep-table-panel, .pending-table-panel, .history-table-panel, .pending-card, .quote-card, .modal-box){
+                :where(.panel, .pro-card, .dev-table-panel, .cust-table-panel, .rep-table-panel, .pending-table-panel, .history-table-panel, .quote-table-panel, .pending-card, .quote-card, .booking-card, .service-category-card, .empty-card, .pending-empty-card, .quote-empty-card, .modal-box){
                     background:var(--ui-surface) !important;
                     border:1px solid var(--ui-line) !important;
                     border-radius:14px !important;
                     box-shadow:var(--ui-shadow) !important;
                 }
 
-                :where(.dash-card, .stat-card, .summary-card, .metric-card-premium, .dev-metric-card, .cust-metric-card){
+                :where(.dash-card, .stat-card, .summary-card, .quote-summary-card, .pro-stat-card, .metric-card-premium, .dev-metric-card, .cust-metric-card){
+                    background:var(--ui-surface) !important;
+                    border:1px solid var(--ui-line) !important;
                     border-radius:14px !important;
                     box-shadow:0 12px 32px rgba(15, 23, 42, .055) !important;
                 }
 
-                .dash-card h2{
-                    font-family:'Mukta Mahee', system-ui, sans-serif !important;
+                .dash-card h2,
+                .stat-card h3,
+                .summary-card h3,
+                .summary-card strong,
+                .quote-summary-card strong,
+                .pro-stat-card h3,
+                .metric-card-premium h3,
+                .dev-metric-card h3,
+                .cust-metric-card h3{
+                    color:var(--ui-heading) !important;
+                    font-family:var(--ui-font) !important;
                     letter-spacing:0 !important;
                 }
 
                 :where(.btn, .btn-create-new, .btn-action, .btn-action-small, .btn-modal, .pending-assign-btn, .btn-pdf-link, .edit-btn, .delete-btn, .add-btn, .save-btn):not(.mobile-nav-toggle):not(.mobile-nav-close):not(.logout-icon):not(.dropdown-btn){
                     border-radius:10px !important;
-                    font-family:'Mukta Mahee', system-ui, sans-serif !important;
+                    font-family:var(--ui-font) !important;
                     font-weight:700 !important;
                     min-height:42px;
                     letter-spacing:0;
@@ -1371,11 +1533,89 @@
                     transform:translateY(-1px);
                 }
 
+                .btn,
+                .btn-create-new,
+                .btn-action,
+                .btn-action-small,
+                .btn-modal,
+                .pending-assign-btn,
+                .add-btn,
+                .save-btn{
+                    background:var(--ui-primary) !important;
+                    border:1px solid transparent !important;
+                    color:#ffffff !important;
+                }
+
+                .blue,
+                .btn.blue,
+                .edit-btn,
+                .btn-pdf-link{
+                    background:var(--ui-blue) !important;
+                    color:#ffffff !important;
+                }
+
+                .green,
+                .btn.green,
+                .save-btn{
+                    background:var(--ui-accent) !important;
+                    color:#ffffff !important;
+                }
+
+                .red,
+                .btn.red,
+                .delete-btn{
+                    background:var(--ui-red) !important;
+                    color:#ffffff !important;
+                }
+
+                .gray,
+                .btn.gray{
+                    background:#475569 !important;
+                    color:#ffffff !important;
+                }
+
+                :where(.badge, .status-badge, .status-badge-pill, .tech-badge, .quote-status-badge, .pending-status-badge, .badge-generic, .badge-phone, .badge-smartphone, .badge-sent, .badge-awaiting){
+                    border:1px solid transparent !important;
+                    border-radius:999px !important;
+                    font-size:.75rem !important;
+                    font-weight:800 !important;
+                    letter-spacing:.02em !important;
+                    line-height:1 !important;
+                    padding:.42rem .72rem !important;
+                    text-transform:uppercase !important;
+                }
+
+                :where(.badge, .badge-generic, .badge-phone, .badge-smartphone){
+                    background:#eff6ff !important;
+                    color:#1d4ed8 !important;
+                }
+
+                :where(.status-approved, .status-completed, .status-paid, .badge-sent){
+                    background:#dcfce7 !important;
+                    color:#166534 !important;
+                }
+
+                :where(.status-pending, .status-processing, .status-quotation, .badge-awaiting){
+                    background:#fef3c7 !important;
+                    color:#92400e !important;
+                }
+
+                :where(.status-rejected, .status-cancelled, .status-overdue){
+                    background:#fee2e2 !important;
+                    color:#991b1b !important;
+                }
+
+                :where(.status-default, .status-draft){
+                    background:#f1f5f9 !important;
+                    color:#475569 !important;
+                }
+
                 :where(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]), select, textarea){
                     border:1px solid #cbd5e1;
                     border-radius:10px;
                     color:var(--ui-text);
-                    font-family:'Mukta Mahee', system-ui, sans-serif;
+                    font-family:var(--ui-font);
+                    font-size:.95rem !important;
                     outline:none;
                     transition:border-color .16s ease, box-shadow .16s ease, background-color .16s ease;
                 }
@@ -1394,6 +1634,7 @@
                     border-collapse:separate !important;
                     border-spacing:0 !important;
                     color:#334155;
+                    font-family:var(--ui-font) !important;
                 }
 
                 :where(.table-wrap table thead th, table.dataTable thead th){
@@ -1428,7 +1669,7 @@
                 .dataTables_wrapper .dataTables_info,
                 .dataTables_wrapper .dataTables_paginate{
                     color:var(--ui-muted) !important;
-                    font-family:'Mukta Mahee', system-ui, sans-serif !important;
+                    font-family:var(--ui-font) !important;
                     font-size:.9rem !important;
                 }
 
@@ -1642,6 +1883,36 @@
 </div>
 
 <script>
+    (function(){
+        const wrapper = document.querySelector('.admin-wrapper');
+        const toggle = document.getElementById('sidebarMinimizeToggle');
+        if(!wrapper || !toggle) return;
+
+        function applySidebarState(minimized){
+            wrapper.classList.toggle('sidebar-minimized', minimized);
+            toggle.setAttribute('aria-expanded', minimized ? 'false' : 'true');
+            toggle.setAttribute('aria-label', minimized ? 'Expand sidebar' : 'Minimize sidebar');
+            toggle.setAttribute('title', minimized ? 'Expand sidebar' : 'Minimize sidebar');
+        }
+
+        applySidebarState(localStorage.getItem('adminSidebarMinimized') === 'true');
+
+        toggle.addEventListener('click', function(){
+            const minimized = !wrapper.classList.contains('sidebar-minimized');
+            applySidebarState(minimized);
+            localStorage.setItem('adminSidebarMinimized', minimized ? 'true' : 'false');
+        });
+
+        wrapper.querySelectorAll('.dropdown-btn').forEach(function(button){
+            button.addEventListener('click', function(){
+                if(wrapper.classList.contains('sidebar-minimized')){
+                    applySidebarState(false);
+                    localStorage.setItem('adminSidebarMinimized', 'false');
+                }
+            });
+        });
+    })();
+
     function toggleMenu(id){
         document.getElementById(id).classList.toggle('show');
     }

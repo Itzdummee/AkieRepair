@@ -531,6 +531,10 @@
                                 <div class="detail-label">Inspection Report</div>
                                 <div class="detail-value">{{ $booking->inspection_report ?? 'Awaiting inspection' }}</div>
                             </div>
+                            <div>
+                                <div class="detail-label">Repair Finished Date</div>
+                                <div class="detail-value">{{ $booking->repair_finished_date ? \Carbon\Carbon::parse($booking->repair_finished_date)->format('d M Y') : '-' }}</div>
+                            </div>
                         </div>
                     </div>
 

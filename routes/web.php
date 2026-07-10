@@ -18,6 +18,7 @@ use App\Http\Controllers\Customer\DeviceController as CustomerDeviceController;
 use App\Http\Controllers\Customer\BookingController as CustomerBookingController;
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
 use App\Http\Controllers\Customer\PaymentController as CustomerPaymentController;
+use App\Http\Controllers\Customer\ReviewController as CustomerReviewController;
 
 /*
 |--------------------------------------------------------------------------
@@ -97,6 +98,12 @@ Route::middleware(['auth', 'role:customer'])->group(function () {
 
     Route::get('/customer/booking/history', [CustomerBookingController::class, 'history'])
         ->name('customer.booking.history');
+
+    Route::get('/customer/bookings/{booking}/review', [CustomerReviewController::class, 'create'])
+        ->name('customer.review.create');
+
+    Route::post('/customer/bookings/{booking}/review', [CustomerReviewController::class, 'store'])
+        ->name('customer.review.store');
 
     Route::get('/customer/booking/{booking}', [CustomerBookingController::class, 'show'])
         ->name('customer.booking.show');
@@ -224,6 +231,9 @@ Route::middleware(['auth', 'role:technician'])->group(function () {
 
     Route::get('/technician/availability', [TechnicianDashboardController::class, 'availability'])
         ->name('technician.availability');
+
+    Route::get('/technician/bookings/{booking}/inspection', [TechnicianDashboardController::class, 'showInspection'])
+        ->name('technician.bookings.inspection.show');
 
     Route::put('/technician/bookings/{booking}/inspection', [TechnicianDashboardController::class, 'updateInspection'])
         ->name('technician.bookings.inspection');

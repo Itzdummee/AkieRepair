@@ -298,11 +298,11 @@
             </div>
         </div>
 
-        <!-- Device Breakdown -->
+        <!-- Repair Device Type Breakdown -->
         <div class="pro-card">
             <div class="pro-card-header">
                 <span class="pro-card-title">
-                    <i class="bi bi-pie-chart-fill"></i> Device Breakdown
+                    <i class="bi bi-pie-chart-fill"></i> Repair Device Type Breakdown
                 </span>
             </div>
             <div class="pro-chart-container" style="height: 230px;">
@@ -310,12 +310,12 @@
             </div>
             <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px; font-size: 13px; color: #4b5563;">
                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #f3f4f6; padding-bottom: 6px;">
-                    <span>Total Unique Brands</span>
-                    <strong>{{ \App\Models\Device::distinct('brand')->count('brand') }} Brands</strong>
+                    <span>Total Repair Requests</span>
+                    <strong>{{ $totalRepairDeviceBookings }} Jobs</strong>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span>Total Database Models</span>
-                    <strong>{{ $totalDevices }} Models</strong>
+                    <span>Device Types Repaired</span>
+                    <strong>{{ $totalRepairDeviceTypes }} Types</strong>
                 </div>
             </div>
         </div>
@@ -546,8 +546,8 @@
             }
         });
 
-        // 2. Device Breakdown Doughnut Chart
-        const deviceData = @json($deviceDistribution);
+        // 2. Repair Device Type Breakdown Doughnut Chart
+        const deviceData = @json($repairDeviceDistribution);
         const deviceLabels = deviceData.map(item => item.type);
         const deviceCounts = deviceData.map(item => item.count);
 
@@ -584,7 +584,7 @@
                             label: function(context) {
                                 let label = context.label || '';
                                 if (label) { label += ': '; }
-                                label += context.raw + ' Models';
+                                label += context.raw + ' Repair Jobs';
                                 return label;
                             }
                         }

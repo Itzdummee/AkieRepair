@@ -10,6 +10,7 @@ class DeviceController extends Controller
     public function index()
     {
         $devices = Device::with(['smartphone', 'homeAppliance'])
+            ->where('is_active', true)
             ->latest()
             ->get();
 

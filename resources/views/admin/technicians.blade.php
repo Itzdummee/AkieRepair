@@ -354,8 +354,8 @@
                                     @else
                                         <div class="tech-avatar-placeholder">{{ $initials }}</div>
                                     @endif
-                                    <span class="tech-badge" style="background-color: {{ strtolower($technician->approval_status ?? 'approved') === 'approved' ? '#10b981' : '#dc2626' }}">
-                                        {{ $technician->approval_status ?? 'Approved' }}
+                                    <span class="tech-badge" style="background-color: {{ $technician->is_active ? '#10b981' : '#dc2626' }}">
+                                        {{ $technician->is_active ? ($technician->approval_status ?? 'Approved') : 'Inactive' }}
                                     </span>
                                 </div>
                                 <span class="tech-id">ID: {{ $technician->id }}</span>
@@ -380,11 +380,12 @@
                                         method="POST"
                                         action="{{ route('admin.technicians.destroy', $technician->id) }}"
                                         style="display:inline; flex: 1; margin: 0;"
-                                        onsubmit="return confirm('Delete this technician?')">
+                                        onsubmit="return confirm('{{ $technician->is_active ? 'Deactivate' : 'Activate' }} this technician?')">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn red" style="width: 100%;">
-                                            <i class="bi bi-trash"></i> Delete
+                                            <i class="bi {{ $technician->is_active ? 'bi-pause-circle-fill' : 'bi-play-circle-fill' }}"></i>
+                                            {{ $technician->is_active ? 'Deactivate' : 'Activate' }}
                                         </button>
                                     </form>
                                 </div>
@@ -425,7 +426,7 @@
                                             <ul class="avail-list">
                                                 @foreach($technician->availabilities as $index => $availability)
                                                     <li class="avail-item" style="{{ $index >= 3 ? 'display:none;' : '' }}">
-                                                        <div class="avail-date">{{ \Carbon\Carbon::parse($availability->unavailable_date)->format('d M Y') }}</div>
+                                                        <div class="avail-date">{{ $availability->display_date_range }}</div>
                                                         <div class="avail-reason">{{ $availability->reason }}</div>
                                                     </li>
                                                 @endforeach

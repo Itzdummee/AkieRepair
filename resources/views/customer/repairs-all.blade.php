@@ -76,94 +76,27 @@
         border-radius: 20px;
         border: 1px solid #e2e8f0;
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.04), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
-        height: 76px;
+        min-height: 76px;
         box-sizing: border-box;
-        overflow: hidden;
+        overflow: visible;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .tabs-container {
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        gap: 16px;
         width: 100%;
         opacity: 1;
         visibility: visible;
         transform: translateY(0);
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .controls-bar.search-active .tabs-container {
-        opacity: 0;
-        visibility: hidden;
-        transform: translateY(-10px);
-        pointer-events: none;
-    }
     .search-bar-container {
-        position: absolute;
-        left: 24px;
-        right: 24px;
-        top: 50%;
-        transform: translateY(-50%) scale(0.95);
+        position: static;
         display: flex;
         align-items: center;
-        gap: 12px;
-        opacity: 0;
-        visibility: hidden;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        pointer-events: none;
-        width: calc(100% - 48px);
-    }
-    .controls-bar.search-active .search-bar-container {
-        opacity: 1;
-        visibility: visible;
-        transform: translateY(-50%) scale(1);
-        pointer-events: auto;
-    }
-    .search-trigger-btn {
-        width: 44px;
-        height: 44px;
-        border-radius: 12px;
-        border: 1px solid #e2e8f0;
-        background: #f8fafc;
-        color: #475569;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        font-size: 1.15rem;
-    }
-    .search-trigger-btn:hover {
-        background: #0f172a;
-        color: white;
-        border-color: #0f172a;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
-    }
-    .search-trigger-btn:active {
-        transform: translateY(0);
-    }
-    .close-search-btn {
-        width: 44px;
-        height: 44px;
-        border-radius: 12px;
-        border: 1px solid #fee2e2;
-        background: #fee2e2;
-        color: #b91c1c;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        font-size: 1.1rem;
-    }
-    .close-search-btn:hover {
-        background: #fca5a5;
-        color: #991b1b;
-        border-color: #fca5a5;
-        transform: translateY(-2px);
-    }
-    .close-search-btn:active {
-        transform: translateY(0);
+        flex: 1 1 280px;
+        min-width: 220px;
     }
     .search-wrapper {
         position: relative;
@@ -202,6 +135,9 @@
     .filter-tabs {
         display: flex;
         gap: 8px;
+        flex: 1 1 auto;
+        overflow-x: auto;
+        scrollbar-width: thin;
     }
     .filter-tab {
         padding: 10px 20px;
@@ -228,13 +164,11 @@
     @media(max-width: 600px) {
         .controls-bar {
             padding: 12px 16px;
-            height: 68px;
+            flex-direction: column;
+            align-items: stretch;
         }
-        .search-bar-container {
-            left: 16px;
-            right: 16px;
-            width: calc(100% - 32px);
-        }
+        .tabs-container { flex-direction: column; align-items: stretch; }
+        .search-bar-container { min-width: 0; width: 100%; }
     }
 
     /* Device Section Card */
@@ -463,21 +397,11 @@
             <button class="filter-tab" onclick="filterCategory('refrigerator', this)">Refrigerators</button>
             <button class="filter-tab" onclick="filterCategory('washingmachine', this)">Washing Machines</button>
         </div>
-        <!-- Search Trigger Button -->
-        <button class="search-trigger-btn" onclick="showSearchBar()" title="Search Devices">
-            <i class="bi bi-search"></i>
-        </button>
-    </div>
-
-    <!-- Search Bar Container (hidden by default) -->
-    <div class="search-bar-container" id="searchBarContainer">
-        <!-- Close Search Button -->
-        <button class="close-search-btn" onclick="hideSearchBar()" title="Close Search">
-            <i class="bi bi-x-lg"></i>
-        </button>
-        <div class="search-wrapper">
-            <i class="bi bi-search"></i>
-            <input type="text" id="deviceSearch" placeholder="Search by device brand or model name..." class="search-input" onkeyup="filterDevices()">
+        <div class="search-bar-container" id="searchBarContainer">
+            <div class="search-wrapper">
+                <i class="bi bi-search"></i>
+                <input type="search" id="deviceSearch" placeholder="Search brand or model..." aria-label="Search devices by brand or model" class="search-input" oninput="filterDevices()">
+            </div>
         </div>
     </div>
 </div>
@@ -588,45 +512,6 @@
 
 <script>
     let activeCategory = 'all';
-
-    function showSearchBar() {
-        const controlsBar = document.querySelector('.controls-bar');
-        if (controlsBar) {
-            controlsBar.classList.add('search-active');
-        }
-        
-        // Auto-focus the search input
-        const searchInput = document.getElementById('deviceSearch');
-        if (searchInput) {
-            setTimeout(() => {
-                searchInput.focus();
-            }, 150);
-        }
-    }
-
-    function hideSearchBar() {
-        const controlsBar = document.querySelector('.controls-bar');
-        if (controlsBar) {
-            controlsBar.classList.remove('search-active');
-        }
-        
-        // Clear search query and filter again
-        const searchInput = document.getElementById('deviceSearch');
-        if (searchInput) {
-            searchInput.value = '';
-        }
-        filterDevices();
-    }
-
-    // Escape key support to close search bar
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape') {
-            const controlsBar = document.querySelector('.controls-bar');
-            if (controlsBar && controlsBar.classList.contains('search-active')) {
-                hideSearchBar();
-            }
-        }
-    });
 
     function filterDevices() {
         const query = document.getElementById('deviceSearch').value.toLowerCase();

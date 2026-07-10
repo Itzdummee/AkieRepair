@@ -97,7 +97,8 @@
 
         .menu-link:hover,
         .dropdown-btn:hover,
-        .menu-link.active{
+        .menu-link.active,
+        .dropdown-btn.active{
             background:#f3f4f6;
             color:#000;
         }
@@ -212,6 +213,18 @@
             padding:35px;
         }
 
+        .sidebar,.customer-main{transition:width .25s ease,margin-left .25s ease,padding .25s ease}
+        .sidebar-minimize-toggle{position:absolute;top:8px;right:8px;width:30px;height:30px;padding:0;border:1px solid #e2e8f0;border-radius:50%;background:#fff;color:#334155;display:grid;place-items:center;cursor:pointer;box-shadow:0 4px 12px rgba(15,23,42,.12);z-index:3}
+        .customer-wrapper.sidebar-minimized .sidebar{width:84px;padding-left:14px;padding-right:14px}
+        .customer-wrapper.sidebar-minimized .customer-main{margin-left:84px;width:calc(100% - 84px)}
+        .customer-wrapper.sidebar-minimized .brand-box{justify-content:center;margin-top:20px}
+        .customer-wrapper.sidebar-minimized .brand-box>div:last-child,.customer-wrapper.sidebar-minimized .dropdown-btn>span:last-child,.customer-wrapper.sidebar-minimized .submenu,.customer-wrapper.sidebar-minimized .user-text,.customer-wrapper.sidebar-minimized .logout-icon{display:none!important}
+        .customer-wrapper.sidebar-minimized .menu-link,.customer-wrapper.sidebar-minimized .dropdown-btn{justify-content:center!important;padding-left:8px;padding-right:8px;font-size:0}
+        .customer-wrapper.sidebar-minimized .menu-left{width:100%;justify-content:center;gap:0}
+        .customer-wrapper.sidebar-minimized .menu-left .icon{font-size:18px;display:grid;place-items:center;margin:0 auto}
+        .customer-wrapper.sidebar-minimized .user-row{justify-content:center}
+        .customer-wrapper.sidebar-minimized .avatar{width:42px;height:42px}
+
         .hero-card{
             background:linear-gradient(135deg,#7c3aed,#2563eb,#06b6d4);
             color:white;
@@ -295,6 +308,7 @@
         }
 
         @media(max-width:900px){
+            .sidebar-minimize-toggle{display:none}
             .sidebar{
                 position:relative;
                 width:100%;
@@ -872,6 +886,7 @@
     <button type="button" class="mobile-nav-backdrop" data-panel-close="customer-wrapper" aria-label="Close customer navigation"></button>
 
     <aside class="sidebar">
+        <button type="button" class="sidebar-minimize-toggle" id="customerSidebarMinimizeToggle" aria-label="Minimize sidebar" aria-expanded="true" title="Minimize sidebar"><i class="bi bi-list"></i></button>
         <button type="button" class="mobile-nav-close" data-panel-close="customer-wrapper" aria-label="Close customer navigation">
             <i class="bi bi-x-lg"></i>
         </button>
@@ -895,7 +910,7 @@
             </div>
 
             <div class="menu-section">
-                <button class="dropdown-btn" onclick="toggleMenu('bookingMenu')" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <button class="dropdown-btn {{ request()->routeIs('customer.booking.*', 'customer.payment.*', 'customer.review.*') ? 'active' : '' }}" onclick="toggleMenu('bookingMenu')" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                     <span class="menu-left">
                         <span class="icon"><i class="bi bi-calendar-check"></i></span>
                         Appointments
@@ -903,14 +918,14 @@
                     <span><i class="bi bi-chevron-down" style="font-size: 11px;"></i></span>
                 </button>
 
-                <div id="bookingMenu" class="submenu {{ request()->routeIs('customer.booking.*') ? 'show' : '' }}">
+                <div id="bookingMenu" class="submenu {{ request()->routeIs('customer.booking.*', 'customer.payment.*', 'customer.review.*') ? 'show' : '' }}">
                     <a href="{{ route('customer.booking.create') }}" class="{{ request()->routeIs('customer.booking.create') ? 'active' : '' }}">
                         Book Appointment
                     </a>
-                    <a href="{{ route('customer.booking.status') }}" class="{{ request()->routeIs('customer.booking.status') ? 'active' : '' }}">
+                    <a href="{{ route('customer.booking.status') }}" class="{{ request()->routeIs('customer.booking.status', 'customer.booking.show', 'customer.payment.*') ? 'active' : '' }}">
                         Booking Status
                     </a>
-                    <a href="{{ route('customer.booking.history') }}" class="{{ request()->routeIs('customer.booking.history') ? 'active' : '' }}">
+                    <a href="{{ route('customer.booking.history') }}" class="{{ request()->routeIs('customer.booking.history', 'customer.review.*') ? 'active' : '' }}">
                         Booking History
                     </a>
                 </div>
@@ -1014,6 +1029,7 @@
             .dropdown-btn:hover,
             .submenu a:hover,
             .menu-link.active,
+            .dropdown-btn.active,
             .submenu a.active{
                 background:#eef6ff !important;
                 color:#0f172a !important;
@@ -1305,6 +1321,23 @@
 </div>
 
 <script>
+    (function(){
+        const wrapper=document.querySelector('.customer-wrapper');
+        const toggle=document.getElementById('customerSidebarMinimizeToggle');
+        if(!wrapper||!toggle)return;
+        function applyState(minimized){wrapper.classList.toggle('sidebar-minimized',minimized);toggle.setAttribute('aria-expanded',minimized?'false':'true');toggle.setAttribute('aria-label',minimized?'Expand sidebar':'Minimize sidebar');toggle.title=minimized?'Expand sidebar':'Minimize sidebar'}
+        applyState(localStorage.getItem('customerSidebarMinimized')==='true');
+        toggle.addEventListener('click',function(){const minimized=!wrapper.classList.contains('sidebar-minimized');applyState(minimized);localStorage.setItem('customerSidebarMinimized',minimized?'true':'false')});
+        wrapper.querySelectorAll('.dropdown-btn').forEach(function(button){
+            button.addEventListener('click',function(){
+                if(wrapper.classList.contains('sidebar-minimized')){
+                    applyState(false);
+                    localStorage.setItem('customerSidebarMinimized','false');
+                }
+            });
+        });
+    })();
+
     function toggleMenu(id){
         document.getElementById(id).classList.toggle('show');
     }

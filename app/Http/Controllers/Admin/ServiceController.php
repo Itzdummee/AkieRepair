@@ -48,10 +48,20 @@ class ServiceController extends Controller
 
     public function destroy(Service $service)
     {
-        $service->delete();
+        $service->update([
+            'is_active' => ! $service->is_active,
+        ]);
+
+        if (! $service->is_active) {
+            $service->repairs()->update(['is_active' => false]);
+        }
+
+        $message = $service->is_active
+            ? 'Service category activated successfully.'
+            : 'Service category deactivated successfully. Related repair pricing records were also deactivated.';
 
         return redirect()
             ->route('admin.services')
-            ->with('delete', 'Service deleted successfully.');
+            ->with('delete', $message);
     }
 }

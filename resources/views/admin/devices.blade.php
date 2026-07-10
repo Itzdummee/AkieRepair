@@ -303,13 +303,23 @@
         transform: translateY(-1px);
     }
     
-    .btn-delete {
-        background: linear-gradient(135deg, #f43f5e, #e11d48);
-        box-shadow: 0 2px 5px rgba(244, 63, 94, 0.15);
+    .btn-deactivate {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        box-shadow: 0 2px 5px rgba(220, 38, 38, 0.2);
     }
     
-    .btn-delete:hover {
-        background: linear-gradient(135deg, #e11d48, #be123c);
+    .btn-deactivate:hover {
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+        transform: translateY(-1px);
+    }
+
+    .btn-activate {
+        background: linear-gradient(135deg, #22c55e, #16a34a);
+        box-shadow: 0 2px 5px rgba(22, 163, 74, 0.2);
+    }
+
+    .btn-activate:hover {
+        background: linear-gradient(135deg, #16a34a, #15803d);
         transform: translateY(-1px);
     }
 
@@ -598,6 +608,7 @@
                         <th>Device Type</th>
                         <th>Model Identifier</th>
                         <th style="text-align: center; width: 120px;">Capacity Specs</th>
+                        <th style="text-align: center; width: 110px;">Status</th>
                         <th style="width: 180px; text-align: center;">Actions</th>
                     </tr>
                 </thead>
@@ -642,6 +653,13 @@
                                     {{ $device->capacity }} {{ $device->capacity_unit }}
                                 </span>
                             </td>
+
+                            <td style="text-align: center;">
+                                <span class="type-badge-pill" style="border: 1px solid {{ $device->is_active ? '#d1fae5' : '#fee2e2' }}; background: {{ $device->is_active ? '#ecfdf5' : '#fef2f2' }}; color: {{ $device->is_active ? '#065f46' : '#991b1b' }};">
+                                    <i class="bi {{ $device->is_active ? 'bi-check-circle-fill' : 'bi-pause-circle-fill' }}"></i>
+                                    {{ $device->is_active ? 'Active' : 'Inactive' }}
+                                </span>
+                            </td>
                             
                             <!-- Action buttons -->
                             <td>
@@ -662,12 +680,12 @@
                                         <span>Edit</span>
                                     </button>
 
-                                    <form method="POST" action="{{ route('admin.devices.destroy', $device->id) }}" style="margin: 0;" onsubmit="return confirm('Are you sure you want to delete this device permanent records?')">
+                                    <form method="POST" action="{{ route('admin.devices.destroy', $device->id) }}" style="margin: 0;" onsubmit="return confirm('{{ $device->is_active ? 'Deactivate' : 'Activate' }} this device?')">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn-action-small btn-delete">
-                                            <i class="bi bi-trash-fill"></i>
-                                            <span>Delete</span>
+                                        <button type="submit" class="btn-action-small {{ $device->is_active ? 'btn-deactivate' : 'btn-activate' }}" title="{{ $device->is_active ? 'Deactivate Device' : 'Activate Device' }}">
+                                            <i class="bi {{ $device->is_active ? 'bi-pause-circle-fill' : 'bi-play-circle-fill' }}"></i>
+                                            <span>{{ $device->is_active ? 'Deactivate' : 'Activate' }}</span>
                                         </button>
                                     </form>
                                 </div>
@@ -792,6 +810,7 @@
         $('#deviceRegistryTable').DataTable({
             pageLength: 10,
             lengthMenu: [5, 10, 25, 50],
+            order: [],
             ordering: true,
             searching: true,
             language: {

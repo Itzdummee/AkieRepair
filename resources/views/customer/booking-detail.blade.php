@@ -159,6 +159,7 @@
     .btn-reject  { background: #ef4444; color: white; }
     .btn-pay     { background: #f59e0b; color: white; }
     .btn-pdf     { background: #3b82f6; color: white; }
+    .btn-review  { background: #16a34a; color: white; }
 
     .booking-main-title {
         display: flex;
@@ -214,6 +215,10 @@
             <div class="info-item">
                 <span class="info-label">Visit Date</span>
                 <span class="info-value">{{ $booking->visit_date ? \Carbon\Carbon::parse($booking->visit_date)->format('d M Y') : '-' }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Repair Finished Date</span>
+                <span class="info-value">{{ $booking->repair_finished_date ? \Carbon\Carbon::parse($booking->repair_finished_date)->format('d M Y') : '-' }}</span>
             </div>
             <div class="info-item">
                 <span class="info-label">Technician</span>
@@ -289,6 +294,23 @@
                 @endif
             </div>
         </div>
+        @if($booking->payment_status === 'Paid' && $booking->status === 'Repair Completed' && ! $booking->review)
+            <div style="margin-top:18px;">
+                <a href="{{ route('customer.review.create', $booking->id) }}" class="action-btn btn-review">
+                    <i class="bi bi-star-fill"></i> Rate This Service
+                </a>
+            </div>
+        @elseif($booking->review)
+            <div style="margin-top:18px; padding:16px 18px; border-radius:12px; background:#f8fafc; border:1px solid #e2e8f0;">
+                <div class="info-label" style="margin-bottom:8px;">Your Review</div>
+                <div style="color:#f59e0b; margin-bottom:8px;">
+                    @for($i = 1; $i <= 5; $i++)
+                        <i class="bi {{ $i <= $booking->review->rating ? 'bi-star-fill' : 'bi-star' }}"></i>
+                    @endfor
+                </div>
+                <p style="margin:0; color:#475569;">{{ $booking->review->comment }}</p>
+            </div>
+        @endif
     </div>
 @endif
 
@@ -303,6 +325,10 @@
                 <div class="info-item">
                     <span class="info-label">Amount Due</span>
                     <span class="info-value" style="color:#b91c1c; font-size:1.2rem;">RM {{ number_format($booking->quotation_price, 2) }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Finished On</span>
+                    <span class="info-value">{{ $booking->repair_finished_date ? \Carbon\Carbon::parse($booking->repair_finished_date)->format('d M Y') : '-' }}</span>
                 </div>
             </div>
             <p style="color:#92400e; margin:0 0 16px; font-size:0.9rem;">

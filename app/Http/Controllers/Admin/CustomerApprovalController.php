@@ -75,8 +75,15 @@ class CustomerApprovalController extends Controller
 
     public function destroy(User $user)
     {
-        $user->delete();
-        return back()->with('success', 'Customer account deleted successfully.');
+        $user->update([
+            'is_active' => ! $user->is_active,
+        ]);
+
+        $message = $user->is_active
+            ? 'Customer account activated successfully.'
+            : 'Customer account deactivated successfully.';
+
+        return back()->with('success', $message);
     }
 
     public function approve(User $user)

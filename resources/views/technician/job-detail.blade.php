@@ -108,7 +108,7 @@
         letter-spacing: 0.05em;
     }
 
-    .job-select, .job-textarea {
+    .job-select, .job-textarea, .job-date-input {
         width: 100%;
         border: 1px solid #cbd5e1;
         border-radius: 8px;
@@ -119,7 +119,7 @@
         background-color: #fff;
         transition: border-color 0.2s, box-shadow 0.2s;
     }
-    .job-select:focus, .job-textarea:focus {
+    .job-select:focus, .job-textarea:focus, .job-date-input:focus {
         outline: none;
         border-color: #2563eb;
         box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
@@ -255,6 +255,20 @@
                     <label>Repair Update / Completion Note</label>
                     <textarea name="note" class="job-textarea" rows="4" placeholder="Describe the repair progress or completion details..." required></textarea>
                 </div>
+
+                <div class="job-form-group">
+                    <label>Repair Finished Date</label>
+                    <input type="date"
+                           name="repair_finished_date"
+                           class="job-date-input"
+                           value="{{ old('repair_finished_date', now()->toDateString()) }}"
+                           min="{{ $booking->visit_date ? \Carbon\Carbon::parse($booking->visit_date)->toDateString() : '' }}"
+                           max="{{ now()->toDateString() }}">
+                    <small style="color:#6b7280; font-size: 11px;">Set the actual date the repair work was completed before marking this job as finished.</small>
+                    @error('repair_finished_date')
+                        <div style="color:#dc2626; font-size:12px; font-weight:700; margin-top:6px;">{{ $message }}</div>
+                    @enderror
+                </div>
                 
                 <div class="job-form-group" style="margin-bottom: 20px;">
                     <label>Proof Image (optional - for completion)</label>
@@ -273,7 +287,7 @@
             </form>
         @elseif($booking->status == 'Repair Finished')
             <div class="job-status-banner completed">
-                <i class="bi bi-check-circle-fill"></i> Repair finished. Waiting for customer payment.
+                <i class="bi bi-check-circle-fill"></i> Repair finished{{ $booking->repair_finished_date ? ' on ' . $booking->repair_finished_date->format('d M Y') : '' }}. Waiting for customer payment.
             </div>
         @else
             <div class="job-status-banner accepted">

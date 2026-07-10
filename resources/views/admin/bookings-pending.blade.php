@@ -3,471 +3,681 @@
 @section('title', 'Pending Bookings')
 
 @section('content')
-<!-- Custom Modern CSS styles directly in dashboard to provide high visual grade premium style -->
 <style>
-    .pending-container {
+    .pending-page {
         display: flex;
         flex-direction: column;
-        gap: 30px;
-    }
-    
-    /* Header & Metrics styling */
-    .pending-header-panel {
-        background: #ffffff;
-        border: 1px solid rgba(229, 231, 235, 0.8);
-        border-radius: 16px;
-        padding: 24px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-    }
-    
-    .pending-title-area h1 {
-        font-family: 'Playfair Display', serif;
-        font-size: 28px;
-        font-weight: 700;
-        color: #111827;
-        margin-bottom: 6px;
-    }
-    
-    .pending-title-area p {
-        font-size: 14px;
-        color: #6b7280;
-    }
-    
-    .pending-count-badge {
-        background: linear-gradient(135deg, #f59e0b, #d97706);
-        color: #ffffff;
-        padding: 10px 20px;
-        border-radius: 99px;
-        font-weight: 700;
-        font-size: 14px;
-        box-shadow: 0 4px 10px rgba(245, 158, 11, 0.25);
-        display: flex;
-        align-items: center;
-        gap: 8px;
+        gap: 18px;
     }
 
-    /* Message styling */
-    .alert-panel {
-        padding: 16px 20px;
+    .pending-topbar {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 18px;
+        padding: 22px 24px;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 18px;
+        align-items: center;
+        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+    }
+
+    .pending-title h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: 28px;
+        font-weight: 800;
+        color: #111827;
+        margin: 0 0 6px;
+    }
+
+    .pending-title p {
+        color: #6b7280;
+        font-size: 14px;
+        margin: 0;
+    }
+
+    .pending-summary {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+
+    .summary-card {
+        min-width: 132px;
+        padding: 13px 16px;
+        border-radius: 15px;
+        background: #f8fafc;
+        border: 1px solid #e5e7eb;
+    }
+
+    .summary-card span {
+        display: block;
+        font-size: 11px;
+        font-weight: 800;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+    }
+
+    .summary-card strong {
+        display: block;
+        margin-top: 3px;
+        color: #111827;
+        font-size: 22px;
+        line-height: 1;
+    }
+
+    .pending-toolbar {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        padding: 14px;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 14px;
+        align-items: center;
+    }
+
+    .filter-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .filter-btn {
+        border: 1px solid #e5e7eb;
+        background: #ffffff;
+        color: #475569;
+        border-radius: 999px;
+        padding: 10px 15px;
+        font-size: 13px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: .2s ease;
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+        background: #111827;
+        border-color: #111827;
+        color: #ffffff;
+    }
+
+    .search-box {
+        position: relative;
+        width: 280px;
+    }
+
+    .search-box i {
+        position: absolute;
+        left: 13px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+    }
+
+    .search-box input {
+        width: 100%;
+        height: 42px;
+        border: 1px solid #e5e7eb;
         border-radius: 12px;
-        margin-bottom: 10px;
+        padding: 0 13px 0 38px;
+        outline: none;
         font-weight: 600;
+        color: #334155;
+    }
+
+    .search-box input:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, .10);
+    }
+
+    .alert-panel {
+        padding: 14px 18px;
+        border-radius: 14px;
+        font-weight: 700;
         font-size: 14px;
         display: flex;
         align-items: center;
-        gap: 12px;
-        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.03);
+        gap: 10px;
     }
-    
+
     .alert-success-panel {
         background-color: #ecfdf5;
         border: 1px solid #a7f3d0;
         color: #065f46;
     }
-    
+
     .alert-error-panel {
         background-color: #fef2f2;
         border: 1px solid #fca5a5;
         color: #991b1b;
     }
 
-    /* Grid layout */
-    .pending-grid {
+    .booking-list {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
-        gap: 24px;
+        grid-template-columns: 1fr;
+        gap: 12px;
     }
-    
-    @media(max-width: 640px) {
-        .pending-grid {
-            grid-template-columns: 1fr;
-        }
-    }
-    
-    /* Card design */
-    .pending-card {
+
+    .booking-card {
         background: #ffffff;
-        border: 1px solid rgba(229, 231, 235, 0.8);
+        border: 1px solid #e5e7eb;
         border-radius: 18px;
-        padding: 26px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 2px 4px -1px rgba(0, 0, 0, 0.01);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        padding: 16px;
+        display: grid;
+        grid-template-columns: 240px 1fr 260px;
+        gap: 18px;
+        align-items: stretch;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.045);
+        transition: .2s ease;
+    }
+
+    .booking-card:hover {
+        border-color: #cbd5e1;
+        transform: translateY(-2px);
+        box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    .booking-identity {
+        border-right: 1px dashed #e5e7eb;
+        padding-right: 16px;
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
-        position: relative;
-        overflow: hidden;
+        gap: 12px;
     }
-    
-    .pending-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.06), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
-        border-color: rgba(245, 158, 11, 0.3);
-    }
-    
-    .pending-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 4px;
-        height: 100%;
-        background: linear-gradient(180deg, #f59e0b, #d97706);
-    }
-    
-    .pending-card-header {
+
+    .status-row {
         display: flex;
-        justify-content: space-between;
-        align-items: start;
-        margin-bottom: 20px;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
     }
-    
-    .pending-card-title {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-    }
-    
-    .pending-badge {
-        align-self: flex-start;
-        background: #fffbeb;
-        color: #d97706;
-        border: 1px solid #fef3c7;
-        font-size: 11px;
-        font-weight: 700;
+
+    .status-badge {
+        width: fit-content;
+        background: #fff7ed;
+        color: #ea580c;
+        border: 1px solid #fed7aa;
+        font-size: 10px;
+        font-weight: 900;
         text-transform: uppercase;
-        padding: 4px 10px;
-        border-radius: 50px;
-        letter-spacing: 0.03em;
+        padding: 6px 10px;
+        border-radius: 999px;
+        letter-spacing: .05em;
     }
-    
-    .pending-card-header h2 {
+
+    .device-type-pill {
+        width: fit-content;
+        background: #eff6ff;
+        color: #2563eb;
+        border: 1px solid #bfdbfe;
+        font-size: 10px;
+        font-weight: 900;
+        text-transform: uppercase;
+        padding: 6px 10px;
+        border-radius: 999px;
+        letter-spacing: .05em;
+    }
+
+    .booking-id {
         font-family: 'Playfair Display', serif;
-        font-size: 20px;
-        font-weight: 700;
+        font-size: 24px;
         color: #111827;
-        margin-top: 4px;
+        font-weight: 800;
+        margin: 0;
     }
-    
-    .pending-icon-box {
-        width: 48px;
-        height: 48px;
-        background: #fffbeb;
-        color: #d97706;
-        border-radius: 12px;
+
+    .customer-line {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .customer-avatar {
+        width: 38px;
+        height: 38px;
+        border-radius: 13px;
+        background: linear-gradient(135deg, #2563eb, #1e40af);
+        color: #ffffff;
         display: grid;
         place-items: center;
-        font-size: 20px;
+        font-weight: 900;
+        text-transform: uppercase;
+        overflow: hidden;
         flex-shrink: 0;
     }
-    
-    /* Info Panel details */
-    .pending-card-body {
-        margin-bottom: 24px;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
+
+
+    .customer-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: inherit;
+        display: block;
     }
-    
-    .pending-info-row {
-        display: flex;
-        gap: 12px;
-        font-size: 14px;
-        line-height: 1.5;
-    }
-    
-    .pending-info-row i {
-        color: #9ca3af;
-        font-size: 16px;
-        margin-top: 2px;
-        width: 18px;
-        text-align: center;
-    }
-    
-    .pending-info-content {
-        display: flex;
-        flex-direction: column;
-    }
-    
-    .pending-info-label {
+
+    .customer-line span {
+        display: block;
+        color: #94a3b8;
         font-size: 11px;
-        font-weight: 700;
-        color: #9ca3af;
+        font-weight: 800;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
     }
-    
-    .pending-info-value {
-        color: #374151;
-        font-weight: 600;
+
+    .customer-line strong {
+        display: block;
+        color: #334155;
+        font-size: 14px;
     }
-    
-    .pending-info-value.problem-desc {
-        background: #f9fafb;
-        border: 1px solid #f3f4f6;
-        border-radius: 8px;
-        padding: 10px 12px;
-        color: #4b5563;
+
+    .booking-details {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(140px, 1fr));
+        gap: 12px;
+        align-content: start;
+    }
+
+    .detail-box {
+        background: #f8fafc;
+        border: 1px solid #eef2f7;
+        border-radius: 14px;
+        padding: 12px;
+        min-height: 72px;
+    }
+
+    .detail-box.full {
+        grid-column: 1 / -1;
+    }
+
+    .detail-label {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 10px;
+        color: #94a3b8;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        margin-bottom: 6px;
+    }
+
+    .detail-value {
+        color: #334155;
+        font-weight: 800;
+        font-size: 13px;
+        word-break: break-word;
+    }
+
+    .problem-text {
+        color: #475569;
         font-style: italic;
-        font-weight: 500;
-        margin-top: 4px;
+        font-weight: 600;
+        line-height: 1.5;
+        max-height: 42px;
+        overflow: auto;
     }
-    
-    /* Form inputs styling */
-    .pending-card-footer {
-        border-top: 1px dashed #e5e7eb;
-        padding-top: 20px;
-    }
-    
-    .pending-form-group {
+
+    .assign-panel {
+        background: #f8fafc;
+        border: 1px solid #eef2f7;
+        border-radius: 16px;
+        padding: 14px;
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        justify-content: center;
+        gap: 10px;
     }
-    
-    .pending-form-group label {
-        font-size: 12px;
-        font-weight: 700;
-        color: #4b5563;
+
+    .assign-panel label {
+        font-size: 11px;
+        font-weight: 900;
+        color: #64748b;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
-        margin-bottom: 0;
+        letter-spacing: .06em;
+        margin: 0;
     }
-    
+
     .pending-select {
         width: 100%;
-        height: 46px;
-        border: 1px solid #d1d5db;
-        border-radius: 10px;
+        height: 42px;
+        border: 1px solid #dbe3ef;
+        border-radius: 12px;
         padding: 0 12px;
         background: #ffffff;
-        font-family: inherit;
-        font-size: 14px;
-        color: #374151;
-        font-weight: 600;
+        font-size: 13px;
+        color: #334155;
+        font-weight: 700;
         outline: none;
-        transition: all 0.2s ease;
     }
-    
+
     .pending-select:focus {
-        border-color: #f59e0b;
-        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.12);
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, .10);
     }
-    
+
     .pending-assign-btn {
         width: 100%;
-        height: 46px;
-        margin-top: 12px;
+        height: 42px;
         background: linear-gradient(135deg, #2563eb, #1d4ed8);
         color: #ffffff;
         border: none;
-        border-radius: 10px;
-        font-weight: 700;
-        font-size: 13px;
+        border-radius: 12px;
+        font-weight: 900;
+        font-size: 12px;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
+        letter-spacing: .05em;
         cursor: pointer;
-        transition: all 0.3s ease;
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 8px;
-        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.15);
+        transition: .2s ease;
     }
-    
+
     .pending-assign-btn:hover {
-        background: linear-gradient(135deg, #1d4ed8, #1e40af);
         transform: translateY(-1px);
-        box-shadow: 0 6px 14px rgba(37, 99, 235, 0.25);
+        box-shadow: 0 8px 16px rgba(37, 99, 235, .22);
     }
-    
-    /* Empty state */
+
     .pending-empty-card {
-        grid-column: 1 / -1;
         background: #ffffff;
-        border: 1px dashed #d1d5db;
+        border: 1px dashed #cbd5e1;
         border-radius: 18px;
-        padding: 60px 20px;
+        padding: 55px 20px;
         text-align: center;
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
-        gap: 16px;
+        gap: 14px;
     }
-    
+
     .pending-empty-icon {
-        width: 72px;
-        height: 72px;
-        background: #f3f4f6;
-        color: #9ca3af;
+        width: 70px;
+        height: 70px;
+        background: #f1f5f9;
+        color: #94a3b8;
         border-radius: 50%;
         display: grid;
         place-items: center;
-        font-size: 32px;
+        font-size: 30px;
     }
-    
+
     .pending-empty-card h3 {
         font-family: 'Playfair Display', serif;
         font-size: 22px;
-        font-weight: 700;
-        color: #374151;
+        font-weight: 800;
+        color: #334155;
         margin: 0;
     }
-    
+
     .pending-empty-card p {
-        color: #6b7280;
+        color: #64748b;
         font-size: 14px;
-        max-width: 320px;
         margin: 0;
+    }
+
+    .no-filter-result {
+        display: none;
+    }
+
+    @media (max-width: 1180px) {
+        .booking-card {
+            grid-template-columns: 1fr;
+        }
+
+        .booking-identity {
+            border-right: 0;
+            border-bottom: 1px dashed #e5e7eb;
+            padding-right: 0;
+            padding-bottom: 14px;
+        }
+
+        .booking-details {
+            grid-template-columns: repeat(2, minmax(150px, 1fr));
+        }
+    }
+
+    @media (max-width: 760px) {
+        .pending-topbar,
+        .pending-toolbar {
+            grid-template-columns: 1fr;
+        }
+
+        .pending-summary {
+            justify-content: flex-start;
+        }
+
+        .search-box {
+            width: 100%;
+        }
+
+        .booking-details {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
 
-<div class="pending-container">
-    
-    <!-- Header panel -->
-    <div class="pending-header-panel">
-        <div class="pending-title-area">
-            <h1>Pending Visit Bookings</h1>
-            <p>Assign qualified available technicians to handle initial system diagnostics and inspection visits.</p>
+@php
+    function bookingMatchesDeviceCategory($booking, $category) {
+        $deviceType = strtolower($booking->device->type ?? '');
+        $deviceName = strtolower($booking->device->name ?? '');
+        $deviceBrand = strtolower($booking->device->brand ?? '');
+        $text = $deviceType.' '.$deviceName.' '.$deviceBrand;
+
+        return match ($category) {
+            'smartphone' => str_contains($text, 'smartphone') || str_contains($text, 'phone'),
+            'refrigerator' => str_contains($text, 'refrigerator') || str_contains($text, 'fridge'),
+            'washing-machine' => str_contains($text, 'washing') || str_contains($text, 'washer'),
+            'television' => str_contains($text, 'television') || str_contains($text, 'tv'),
+            default => false,
+        };
+    }
+
+    $smartphoneCount = $bookings->filter(fn ($booking) => bookingMatchesDeviceCategory($booking, 'smartphone'))->count();
+    $refrigeratorCount = $bookings->filter(fn ($booking) => bookingMatchesDeviceCategory($booking, 'refrigerator'))->count();
+    $washingMachineCount = $bookings->filter(fn ($booking) => bookingMatchesDeviceCategory($booking, 'washing-machine'))->count();
+    $televisionCount = $bookings->filter(fn ($booking) => bookingMatchesDeviceCategory($booking, 'television'))->count();
+@endphp
+
+<div class="pending-page">
+
+    <div class="pending-topbar">
+        <div class="pending-title">
+            <h1>Pending Bookings</h1>
+            <p>View all pending booking requests in one organized list and assign suitable technicians faster.</p>
         </div>
-        <div class="pending-count-badge">
-            <i class="bi bi-clock-history"></i>
-            <span>{{ $bookings->count() }} Booking Requests</span>
+
+        <div class="pending-summary">
+            <div class="summary-card">
+                <span>Total Pending</span>
+                <strong>{{ $bookings->count() }}</strong>
+            </div>
+            <div class="summary-card">
+                <span>Smartphone</span>
+                <strong>{{ $smartphoneCount }}</strong>
+            </div>
+            <div class="summary-card">
+                <span>Refrigerator</span>
+                <strong>{{ $refrigeratorCount }}</strong>
+            </div>
+            <div class="summary-card">
+                <span>Washing Machine</span>
+                <strong>{{ $washingMachineCount }}</strong>
+            </div>
+            <div class="summary-card">
+                <span>Television</span>
+                <strong>{{ $televisionCount }}</strong>
+            </div>
         </div>
     </div>
 
-    <!-- Alert Notifications -->
-    
+    <div class="pending-toolbar">
+        <div class="filter-buttons">
+            <button type="button" class="filter-btn active" data-filter="all">
+                <i class="bi bi-grid"></i> All Bookings
+            </button>
+            <button type="button" class="filter-btn" data-filter="smartphone">
+                <i class="bi bi-phone"></i> Smartphone
+            </button>
+            <button type="button" class="filter-btn" data-filter="refrigerator">
+                <i class="bi bi-snow"></i> Refrigerator
+            </button>
+            <button type="button" class="filter-btn" data-filter="washing-machine">
+                <i class="bi bi-droplet"></i> Washing Machine
+            </button>
+            <button type="button" class="filter-btn" data-filter="television">
+                <i class="bi bi-tv"></i> Television
+            </button>
+        </div>
+
+        <div class="search-box">
+            <i class="bi bi-search"></i>
+            <input type="text" id="bookingSearch" placeholder="Search customer, booking ID, phone...">
+        </div>
+    </div>
+
+    @if(session('success'))
+        <div class="alert-panel alert-success-panel" id="popup-notification">
+            <i class="bi bi-check-circle-fill"></i>
+            <span>{{ session('success') }}</span>
+        </div>
+    @endif
 
     @if($errors->any())
         <div class="alert-panel alert-error-panel" id="popup-notification-error">
-            <i class="bi bi-exclamation-triangle-fill" style="font-size: 18px;"></i>
+            <i class="bi bi-exclamation-triangle-fill"></i>
             <span>{{ $errors->first() }}</span>
         </div>
     @endif
 
-    <!-- Cards Grid -->
-    <div class="pending-grid">
+    <div class="booking-list" id="bookingList">
         @forelse($bookings as $booking)
-            <div class="pending-card">
-                <div>
-                    <!-- Card Top Header -->
-                    <div class="pending-card-header">
-                        <div class="pending-card-title">
-                            <span class="pending-badge">{{ $booking->status }}</span>
-                            <h2>Booking ID #{{ $booking->id }}</h2>
-                        </div>
-                        <div class="pending-icon-box">
-                            <i class="bi bi-calendar-range"></i>
-                        </div>
-                    </div>
+            @php
+                $deviceCategory = 'other';
 
-                    <!-- Customer & Request Data -->
-                    <div class="pending-card-body">
-                        <!-- Customer Name -->
-                        <div class="pending-info-row">
-                            <i class="bi bi-person-circle"></i>
-                            <div class="pending-info-content">
-                                <span class="pending-info-label">Customer</span>
-                                <span class="pending-info-value">{{ $booking->customer->name ?? 'Guest User' }}</span>
-                            </div>
-                        </div>
+                foreach (['smartphone', 'refrigerator', 'washing-machine', 'television'] as $category) {
+                    if (bookingMatchesDeviceCategory($booking, $category)) {
+                        $deviceCategory = $category;
+                        break;
+                    }
+                }
 
-                        <!-- Phone Number -->
-                        <div class="pending-info-row">
-                            <i class="bi bi-telephone"></i>
-                            <div class="pending-info-content">
-                                <span class="pending-info-label">Phone Reference</span>
-                                <span class="pending-info-value">{{ $booking->customer->phone_number ?? '-' }}</span>
-                            </div>
-                        </div>
+                $customerName = $booking->customer->name ?? 'Guest User';
+                $initial = strtoupper(substr($customerName, 0, 1));
+                $profilePicture = $booking->customer->profile_picture
+                    ?? $booking->customer->profile_photo
+                    ?? $booking->customer->avatar
+                    ?? $booking->customer->image
+                    ?? null;
 
-                        <!-- Device Detail -->
-                        <div class="pending-info-row">
-                            <i class="bi bi-phone"></i>
-                            <div class="pending-info-content">
-                                <span class="pending-info-label">Device Type</span>
-                                <span class="pending-info-value">{{ $booking->device->name ?? '-' }} ({{ $booking->device->brand ?? '-' }})</span>
-                            </div>
-                        </div>
+                if ($profilePicture && !str_starts_with($profilePicture, 'http')) {
+                    $profilePicture = asset('storage/' . ltrim($profilePicture, '/'));
+                }
+            @endphp
 
-                        <!-- Scheduled Visit Date -->
-                        <div class="pending-info-row">
-                            <i class="bi bi-calendar2-event"></i>
-                            <div class="pending-info-content">
-                                <span class="pending-info-label">Scheduled Date</span>
-                                <span class="pending-info-value" style="color: #2563eb;">
-                                    {{ $booking->visit_date ? \Carbon\Carbon::parse($booking->visit_date)->format('l, d M Y') : 'Not Specified' }}
-                                </span>
-                            </div>
-                        </div>
+            <div class="booking-card"
+                 data-device-category="{{ $deviceCategory }}"
+                 data-search="{{ strtolower($booking->id.' '.$customerName.' '.($booking->customer->phone_number ?? '').' '.($booking->device->name ?? '').' '.($booking->device->brand ?? '').' '.($booking->status ?? '')) }}">
 
-                        <!-- Problem Description -->
-                        <div class="pending-info-row">
-                            <i class="bi bi-chat-left-text"></i>
-                            <div class="pending-info-content" style="width: 100%;">
-                                <span class="pending-info-label">Problem Statement</span>
-                                <div class="pending-info-value problem-desc">"{{ $booking->problem_description }}"</div>
-                            </div>
+                <div class="booking-identity">
+                    <h2 class="booking-id">Booking #{{ $booking->id }}</h2>
+
+                    <div class="customer-line">
+                        <div class="customer-avatar">
+                            @if($profilePicture)
+                                <img src="{{ $profilePicture }}" alt="{{ $customerName }} profile picture">
+                            @else
+                                {{ $initial }}
+                            @endif
+                        </div>
+                        <div>
+                            <span>Customer</span>
+                            <strong>{{ $customerName }}</strong>
                         </div>
                     </div>
                 </div>
 
-                <!-- Technician Assignment Form -->
-                <div class="pending-card-footer">
+                <div class="booking-details">
+                    <div class="detail-box">
+                        <div class="detail-label"><i class="bi bi-telephone"></i> Phone</div>
+                        <div class="detail-value">{{ $booking->customer->phone_number ?? '-' }}</div>
+                    </div>
+
+                    <div class="detail-box">
+                        <div class="detail-label"><i class="bi bi-phone"></i> Device</div>
+                        <div class="detail-value">{{ $booking->device->name ?? '-' }}</div>
+                    </div>
+
+                    <div class="detail-box">
+                        <div class="detail-label"><i class="bi bi-bookmark"></i> Brand</div>
+                        <div class="detail-value">{{ $booking->device->brand ?? '-' }}</div>
+                    </div>
+
+                    <div class="detail-box">
+                        <div class="detail-label"><i class="bi bi-calendar2-event"></i> Visit Date</div>
+                        <div class="detail-value" style="color:#2563eb;">
+                            {{ $booking->visit_date ? \Carbon\Carbon::parse($booking->visit_date)->format('d M Y') : 'Not Specified' }}
+                        </div>
+                    </div>
+
+                    <div class="detail-box full">
+                        <div class="detail-label"><i class="bi bi-chat-left-text"></i> Problem Statement</div>
+                        <div class="problem-text">"{{ $booking->problem_description }}"</div>
+                    </div>
+                </div>
+
+                <div class="assign-panel">
                     <form method="POST" action="{{ route('admin.bookings.assign', $booking->id) }}">
                         @csrf
                         @method('PUT')
 
-                        <div class="pending-form-group">
-                            <label><i class="bi bi-tools" style="margin-right: 4px;"></i> Assign Field Technician</label>
+                        <label><i class="bi bi-tools"></i> Assign Technician</label>
 
-                            <select name="technician_id" class="pending-select" required>
-                                <option value="">Select available technician</option>
+                        <select name="technician_id" class="pending-select" required>
+                            <option value="">Select available technician</option>
 
-                                @foreach($technicians as $technician)
-                                    @php
-                                        $isUnavailable = $technician->availabilities
-                                            ->where('unavailable_date', $booking->visit_date)
-                                            ->count() > 0;
-                                        
-                                        $deviceType = $booking->device->type ?? null;
-                                        $isSpecialized = true;
-                                        if ($deviceType) {
-                                            $specialties = array_map('trim', explode(',', strtolower($technician->specialty ?? '')));
-                                            $isSpecialized = false;
-                                            foreach ($specialties as $specialty) {
-                                                if (str_contains($specialty, strtolower($deviceType))) {
-                                                    $isSpecialized = true;
-                                                    break;
-                                                }
+                            @foreach($technicians as $technician)
+                                @php
+                                    $isUnavailable = $technician->availabilities
+                                        ->contains(function ($availability) use ($booking) {
+                                            return $booking->visit_date && $availability->isUnavailableOn($booking->visit_date);
+                                        });
+
+                                    $deviceType = $booking->device->type ?? null;
+                                    $isSpecialized = true;
+
+                                    if ($deviceType) {
+                                        $specialties = array_map('trim', explode(',', strtolower($technician->specialty ?? '')));
+                                        $isSpecialized = false;
+
+                                        foreach ($specialties as $specialty) {
+                                            if (str_contains($specialty, strtolower($deviceType))) {
+                                                $isSpecialized = true;
+                                                break;
                                             }
                                         }
-                                    @endphp
+                                    }
+                                @endphp
 
-                                    @if(!$isUnavailable && $isSpecialized)
-                                        <option value="{{ $technician->id }}"
-                                            {{ $booking->technician_id == $technician->id ? 'selected' : '' }}>
-                                            {{ $technician->name }}
-                                        </option>
-                                    @endif
-                                @endforeach
-                            </select>
+                                @if(!$isUnavailable && $isSpecialized)
+                                    <option value="{{ $technician->id }}"
+                                        {{ $booking->technician_id == $technician->id ? 'selected' : '' }}>
+                                        {{ $technician->name }}
+                                    </option>
+                                @endif
+                            @endforeach
+                        </select>
 
-                            <button type="submit" class="pending-assign-btn">
-                                <i class="bi bi-person-check-fill"></i>
-                                <span>Assign</span>
-                            </button>
-                        </div>
+                        <button type="submit" class="pending-assign-btn">
+                            <i class="bi bi-person-check-fill"></i>
+                            Assign
+                        </button>
                     </form>
                 </div>
             </div>
         @empty
-            <!-- Beautiful Empty box state -->
             <div class="pending-empty-card">
                 <div class="pending-empty-icon">
                     <i class="bi bi-folder-check"></i>
@@ -476,6 +686,14 @@
                 <p>There are currently no outstanding visit requests awaiting technician assignments.</p>
             </div>
         @endforelse
+
+        <div class="pending-empty-card no-filter-result" id="noFilterResult">
+            <div class="pending-empty-icon">
+                <i class="bi bi-search"></i>
+            </div>
+            <h3>No Matching Bookings</h3>
+            <p>No bookings match the selected filter or search keyword.</p>
+        </div>
     </div>
 </div>
 
@@ -483,22 +701,63 @@
     document.addEventListener("DOMContentLoaded", function() {
         const successNotify = document.getElementById('popup-notification');
         const errorNotify = document.getElementById('popup-notification-error');
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const searchInput = document.getElementById('bookingSearch');
+        const cards = document.querySelectorAll('.booking-card');
+        const noFilterResult = document.getElementById('noFilterResult');
 
-        if(successNotify) {
-            setTimeout(function(){
-                successNotify.style.transition = 'opacity 0.5s ease';
-                successNotify.style.opacity = '0';
-                setTimeout(() => successNotify.style.display = 'none', 500);
+        let activeFilter = 'all';
+
+        function hideNotification(element) {
+            if (!element) return;
+
+            setTimeout(function() {
+                element.style.transition = 'opacity 0.5s ease';
+                element.style.opacity = '0';
+                setTimeout(() => element.style.display = 'none', 500);
             }, 3500);
         }
 
-        if(errorNotify) {
-            setTimeout(function(){
-                errorNotify.style.transition = 'opacity 0.5s ease';
-                errorNotify.style.opacity = '0';
-                setTimeout(() => errorNotify.style.display = 'none', 500);
-            }, 3500);
+        function applyBookingFilter() {
+            const keyword = (searchInput?.value || '').toLowerCase().trim();
+            let visibleCount = 0;
+
+            cards.forEach(card => {
+                const category = card.dataset.deviceCategory;
+                const searchText = card.dataset.search || '';
+
+                const matchFilter = activeFilter === 'all' || category === activeFilter;
+                const matchSearch = keyword === '' || searchText.includes(keyword);
+
+                if (matchFilter && matchSearch) {
+                    card.style.display = 'grid';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            if (noFilterResult) {
+                noFilterResult.style.display = visibleCount === 0 && cards.length > 0 ? 'flex' : 'none';
+            }
         }
+
+        filterButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                activeFilter = this.dataset.filter;
+                applyBookingFilter();
+            });
+        });
+
+        if (searchInput) {
+            searchInput.addEventListener('input', applyBookingFilter);
+        }
+
+        hideNotification(successNotify);
+        hideNotification(errorNotify);
+        applyBookingFilter();
     });
 </script>
 @endsection

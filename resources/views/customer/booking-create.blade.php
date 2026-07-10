@@ -136,6 +136,13 @@
         margin: 0;
         padding-left: 20px;
     }
+    .field-hint {
+        display: block;
+        color: #6b7280;
+        font-size: 0.85rem;
+        line-height: 1.4;
+        margin-top: 8px;
+    }
     .modern-header {
         position: relative;
         background: #0f172a;
@@ -254,7 +261,23 @@
 
         <div class="form-group">
             <label class="form-label">Preferred Visit Date</label>
-            <input type="date" name="visit_date" class="form-control" required>
+            <input type="date"
+                   name="visit_date"
+                   class="form-control"
+                   value="{{ old('visit_date') }}"
+                   min="{{ now()->toDateString() }}"
+                   required>
+            <span class="field-hint">If no technician is available on this date, you can provide another date below.</span>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Alternative Visit Date</label>
+            <input type="date"
+                   name="alternative_visit_date"
+                   class="form-control"
+                   value="{{ old('alternative_visit_date') }}"
+                   min="{{ now()->toDateString() }}">
+            <span class="field-hint">Optional. This date will only be used when the preferred date has no available technician.</span>
         </div>
 
         <div style="margin-top: 32px;">

@@ -3,396 +3,461 @@
 @section('title', 'My Account')
 
 @section('content')
-
 <style>
-    .modern-header {
-        position: relative;
-        background: #0f172a;
-        color: #ffffff;
-        padding: 40px;
-        border-radius: 24px;
-        margin-bottom: 32px;
-        overflow: hidden;
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    }
-    .modern-header .header-content {
-        position: relative;
-        z-index: 2;
-        display: flex;
-        align-items: center;
-        gap: 24px;
-    }
-    .modern-header .icon-wrapper {
-        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-        width: 72px;
-        height: 72px;
-        border-radius: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 2rem;
-        color: white;
-        box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.5);
-        flex-shrink: 0;
-    }
-    .modern-header .header-title {
-        font-size: 2.2rem;
-        font-weight: 800;
-        margin: 0 0 8px 0;
-        letter-spacing: -0.025em;
-    }
-    .modern-header .header-subtitle {
-        font-size: 1.05rem;
-        color: #94a3b8;
-        margin: 0;
-        max-width: 500px;
-        line-height: 1.5;
-    }
-    .modern-header .header-decoration {
-        position: absolute;
-        top: -50%;
-        right: -10%;
-        width: 400px;
-        height: 400px;
-        background: radial-gradient(circle, rgba(139,92,246,0.25) 0%, rgba(15,23,42,0) 70%);
-        border-radius: 50%;
-        z-index: 1;
-        pointer-events: none;
-    }
-    @media(max-width: 600px) {
-        .modern-header { padding: 24px; }
-        .modern-header .header-content { flex-direction: column; text-align: center; gap: 16px; }
-        .modern-header .header-title { font-size: 1.75rem; }
+    .account-page {
+        --account-ink: #172033;
+        --account-muted: #64748b;
+        --account-line: #e2e8f0;
+        --account-soft: #f8fafc;
+        --account-blue: #2563eb;
+        max-width: 1120px;
+        margin: 0 auto;
     }
 
-    /* Layout Grid */
-    .account-layout {
+    .account-heading {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 24px;
+        margin-bottom: 26px;
+    }
+
+    .account-eyebrow {
+        display: block;
+        color: var(--account-blue);
+        font-size: .78rem;
+        font-weight: 800;
+        letter-spacing: .1em;
+        margin-bottom: 5px;
+        text-transform: uppercase;
+    }
+
+    .account-heading h1 {
+        color: var(--account-ink);
+        font-size: clamp(2rem, 4vw, 2.7rem);
+        line-height: 1.1;
+        margin: 0 0 7px;
+    }
+
+    .account-heading p {
+        color: var(--account-muted);
+        font-size: 1.03rem;
+        margin: 0;
+    }
+
+    .account-status {
+        align-items: center;
+        background: #ecfdf5;
+        border: 1px solid #bbf7d0;
+        border-radius: 999px;
+        color: #166534;
+        display: inline-flex;
+        flex: 0 0 auto;
+        font-size: .86rem;
+        font-weight: 700;
+        gap: 7px;
+        padding: 8px 13px;
+    }
+
+    .account-status i { font-size: .72rem; }
+
+    .account-shell {
         display: grid;
-        grid-template-columns: 1.8fr 1.2fr;
-        gap: 32px;
+        grid-template-columns: minmax(0, 1.55fr) minmax(300px, .85fr);
+        gap: 24px;
         align-items: start;
     }
-    @media(max-width: 1024px) {
-        .account-layout {
-            grid-template-columns: 1fr;
-        }
+
+    .account-card {
+        background: #fff;
+        border: 1px solid var(--account-line);
+        border-radius: 18px;
+        box-shadow: 0 12px 35px rgba(15, 23, 42, .055);
+        overflow: hidden;
     }
 
-    .modern-panel {
-        background: white;
-        border-radius: 20px;
-        padding: 32px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-        border: 1px solid #f3f4f6;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .modern-panel:hover {
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    }
-    .modern-panel h2 {
-        margin-top: 0;
-        font-size: 1.3rem;
-        font-weight: 800;
-        color: #0f172a;
-        margin-bottom: 24px;
-        display: flex;
+    .account-card + .account-card { margin-top: 20px; }
+
+    .account-card-header {
         align-items: center;
-        gap: 12px;
-        border-bottom: 1px solid #f1f5f9;
-        padding-bottom: 18px;
-        letter-spacing: -0.02em;
+        border-bottom: 1px solid #edf2f7;
+        display: flex;
+        gap: 13px;
+        padding: 22px 25px;
     }
 
-    /* Form Styles */
-    .form-group {
-        margin-bottom: 24px;
-    }
-    .form-group label {
-        display: block;
-        font-size: 0.85rem;
-        font-weight: 700;
-        color: #475569;
-        margin-bottom: 8px;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-    }
-    .form-input {
-        width: 100%;
-        padding: 14px 18px;
-        border-radius: 12px;
-        border: 1px solid #cbd5e1;
-        background: #f8fafc;
-        color: #0f172a;
-        font-size: 0.95rem;
-        font-family: inherit;
-        font-weight: 500;
-        box-sizing: border-box;
-        transition: all 0.2s ease;
-    }
-    .form-input:focus {
-        outline: none;
-        border-color: #3b82f6;
-        background: #ffffff;
-        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
-    }
-    .form-input:disabled {
-        background: #e2e8f0;
-        color: #64748b;
-        cursor: not-allowed;
-        border-color: #e2e8f0;
-    }
-
-    /* Action Buttons */
-    .btn-submit {
+    .account-card-icon {
+        align-items: center;
+        background: #eff6ff;
+        border-radius: 10px;
+        color: var(--account-blue);
         display: inline-flex;
-        align-items: center;
+        flex: 0 0 auto;
+        font-size: 1.1rem;
+        height: 40px;
         justify-content: center;
-        gap: 10px;
-        background: linear-gradient(135deg, #3b82f6, #2563eb);
-        color: white;
-        padding: 14px 28px;
-        border-radius: 12px;
-        font-weight: 700;
-        font-size: 0.95rem;
-        border: none;
-        cursor: pointer;
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
-    }
-    .btn-submit:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 16px rgba(37, 99, 235, 0.3);
-    }
-    .btn-submit:active {
-        transform: translateY(0);
+        width: 40px;
     }
 
-    .btn-submit.purple-gradient {
-        background: linear-gradient(135deg, #7c3aed, #6d28d9);
-        box-shadow: 0 4px 12px rgba(109, 40, 217, 0.2);
-    }
-    .btn-submit.purple-gradient:hover {
-        box-shadow: 0 8px 16px rgba(109, 40, 217, 0.3);
-    }
-
-    /* Alerts */
-    .alert {
-        padding: 16px 20px;
-        border-radius: 14px;
-        margin-bottom: 28px;
-        font-size: 0.95rem;
-        display: flex;
-        align-items: flex-start;
-        gap: 14px;
-        line-height: 1.5;
-        border: 1px solid transparent;
-        animation: fadeIn 0.3s ease;
-    }
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    .alert-success {
-        background: #ecfdf5;
-        color: #065f46;
-        border-color: #a7f3d0;
-    }
-    .alert-success i {
-        color: #10b981;
-        font-size: 1.25rem;
-        flex-shrink: 0;
-    }
-    .alert-danger {
-        background: #fef2f2;
-        color: #991b1b;
-        border-color: #fca5a5;
-    }
-    .alert-danger i {
-        color: #ef4444;
-        font-size: 1.25rem;
-        flex-shrink: 0;
-    }
-    .alert ul {
-        margin: 6px 0 0 0;
-        padding-left: 20px;
-    }
-    .alert li {
-        margin-bottom: 4px;
+    .account-card-header h2 {
+        color: var(--account-ink);
+        font-size: 1.1rem;
+        line-height: 1.25;
+        margin: 0 0 2px;
     }
 
-    /* Profile Avatar Badge Widget */
-    .profile-avatar-card {
-        text-align: center;
-        padding: 36px 24px;
-        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    .account-card-header p {
+        color: var(--account-muted);
+        font-size: .9rem;
+        line-height: 1.4;
+        margin: 0;
+    }
+
+    .account-card-body { padding: 25px; }
+
+    .account-profile-summary {
+        background: linear-gradient(145deg, #172033, #26395f);
+        color: #fff;
+        padding: 27px 24px;
+    }
+
+    .account-avatar {
+        align-items: center;
+        background: #fff;
+        border: 4px solid rgba(255, 255, 255, .2);
         border-radius: 16px;
-        border: 1px solid #e2e8f0;
-        margin-bottom: 28px;
-    }
-    .profile-avatar-card .avatar-large {
-        width: 96px;
-        height: 96px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #3b82f6, #7c3aed);
-        color: white;
+        color: #1d4ed8;
         display: flex;
-        align-items: center;
+        font-size: 1.75rem;
+        font-weight: 800;
+        height: 68px;
         justify-content: center;
-        font-size: 2.4rem;
-        font-weight: 800;
-        margin: 0 auto 18px auto;
-        box-shadow: 0 10px 20px rgba(59, 130, 246, 0.25);
+        margin-bottom: 18px;
+        width: 68px;
     }
-    .profile-avatar-card h3 {
-        margin: 0 0 6px 0;
-        font-size: 1.3rem;
-        font-weight: 800;
-        color: #0f172a;
+
+    .account-profile-summary h2 {
+        color: #fff;
+        font-size: 1.35rem;
+        line-height: 1.25;
+        margin: 0 0 4px;
     }
-    .profile-avatar-card p {
-        margin: 0 0 12px 0;
+
+    .account-profile-summary p {
+        color: #cbd5e1;
+        font-size: .92rem;
+        margin: 0;
+        overflow-wrap: anywhere;
+    }
+
+    .account-meta {
+        border-top: 1px solid rgba(255, 255, 255, .13);
+        display: flex;
+        gap: 8px;
+        margin-top: 20px;
+        padding-top: 17px;
+    }
+
+    .account-meta i { color: #93c5fd; }
+    .account-meta span { color: #e2e8f0; font-size: .88rem; }
+
+    .account-form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .account-field.full { grid-column: 1 / -1; }
+
+    .account-field label {
+        color: #334155;
+        display: block;
+        font-size: .88rem;
+        font-weight: 700;
+        margin-bottom: 7px;
+    }
+
+    .account-input-wrap { position: relative; }
+
+    .account-input-icon {
+        color: #94a3b8;
+        left: 14px;
+        pointer-events: none;
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    .account-input {
+        background: var(--account-soft);
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        box-sizing: border-box;
+        color: var(--account-ink);
+        font: inherit;
+        height: 48px;
+        padding: 10px 43px;
+        width: 100%;
+    }
+
+    .account-input:focus {
+        background: #fff;
+        border-color: var(--account-blue) !important;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, .1) !important;
+        outline: none;
+    }
+
+    .account-input.is-invalid { border-color: #dc2626; }
+
+    .account-hint, .account-error {
+        display: block;
+        font-size: .8rem;
+        line-height: 1.4;
+        margin-top: 6px;
+    }
+
+    .account-hint { color: var(--account-muted); }
+    .account-error { color: #b91c1c; font-weight: 600; }
+
+    .password-toggle {
+        align-items: center;
+        background: transparent;
+        border: 0;
         color: #64748b;
-        font-size: 0.9rem;
-        word-break: break-all;
+        cursor: pointer;
+        display: flex;
+        height: 42px;
+        justify-content: center;
+        padding: 0;
+        position: absolute;
+        right: 4px;
+        top: 3px;
+        width: 40px;
     }
-    .profile-avatar-card .badge-role {
-        display: inline-block;
-        background: #e2e8f0;
-        color: #475569;
-        font-weight: 800;
-        font-size: 0.75rem;
-        padding: 5px 12px;
-        border-radius: 9999px;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
+
+    .account-actions {
+        align-items: center;
+        border-top: 1px solid #edf2f7;
+        display: flex;
+        justify-content: flex-end;
+        margin: 25px -25px -25px;
+        padding: 18px 25px;
+    }
+
+    .account-button {
+        align-items: center;
+        background: var(--account-blue);
+        border: 0;
+        border-radius: 10px;
+        color: #fff;
+        cursor: pointer;
+        display: inline-flex;
+        font: inherit;
+        font-size: .92rem;
+        font-weight: 700;
+        gap: 9px;
+        justify-content: center;
+        min-height: 44px;
+        padding: 10px 18px;
+        transition: background .18s ease, box-shadow .18s ease, transform .18s ease;
+    }
+
+    .account-button:hover {
+        background: #1d4ed8;
+        box-shadow: 0 8px 18px rgba(37, 99, 235, .2);
+        transform: translateY(-1px);
+    }
+
+    .security-note {
+        align-items: flex-start;
+        background: #fffbeb;
+        border: 1px solid #fde68a;
+        border-radius: 10px;
+        color: #854d0e;
+        display: flex;
+        font-size: .84rem;
+        gap: 9px;
+        line-height: 1.45;
+        margin-bottom: 20px;
+        padding: 11px 12px;
+    }
+
+    .security-note i { margin-top: 1px; }
+
+    @media (max-width: 980px) {
+        .account-shell { grid-template-columns: 1fr; }
+        .account-side { display: grid; grid-template-columns: 1fr 1.35fr; gap: 20px; }
+        .account-card + .account-card { margin-top: 0; }
+    }
+
+    @media (max-width: 680px) {
+        .account-heading { align-items: flex-start; flex-direction: column; gap: 13px; }
+        .account-status { font-size: .8rem; }
+        .account-form-grid, .account-side { grid-template-columns: 1fr; }
+        .account-field.full { grid-column: auto; }
+        .account-card-header, .account-card-body { padding-left: 19px; padding-right: 19px; }
+        .account-actions { margin-left: -19px; margin-right: -19px; padding-left: 19px; padding-right: 19px; }
+        .account-button { width: 100%; }
     }
 </style>
 
-<!-- Modern Premium Header -->
-<div class="modern-header">
-    <div class="header-content">
-        <div class="icon-wrapper">
-            <i class="bi bi-person-gear"></i>
-        </div>
+<div class="account-page">
+    <header class="account-heading">
         <div>
-            <h1 class="header-title">Account Settings</h1>
-            <p class="header-subtitle">Manage your personal profile information, registered credentials, and secure your access.</p>
+            <span class="account-eyebrow">Account</span>
+            <h1>My account</h1>
+            <p>Keep your contact details up to date and manage your password.</p>
         </div>
-    </div>
-    <div class="header-decoration"></div>
-</div>
+        <span class="account-status"><i class="bi bi-circle-fill"></i> Active customer</span>
+    </header>
 
-<!-- Alerts Panel -->
-
-
-@if($errors->any())
-    <div class="alert alert-danger">
-        <i class="bi bi-exclamation-triangle-fill"></i>
-        <div>
-            <strong>We encountered some issues:</strong>
-            <ul>
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    </div>
-@endif
-
-<!-- Dynamic Grid Layout -->
-<div class="account-layout">
-    
-    <!-- Left Column: Personal Profile Details -->
-    <div class="modern-panel">
-        <h2><i class="bi bi-person-lines-fill"></i> Personal Profile Details</h2>
-        
-        <form action="{{ route('customer.account.update') }}" method="POST">
-            @csrf
-            @method('PUT')
-            
-            <div class="form-group">
-                <label for="name">Full Name</label>
-                <input type="text" name="name" id="name" class="form-input" 
-                       value="{{ old('name', $user->name) }}" required autocomplete="name" 
-                       placeholder="e.g. John Doe">
+    <div class="account-shell">
+        <section class="account-card" aria-labelledby="profile-heading">
+            <div class="account-card-header">
+                <span class="account-card-icon"><i class="bi bi-person"></i></span>
+                <div>
+                    <h2 id="profile-heading">Personal details</h2>
+                    <p>We use these details for booking and repair updates.</p>
+                </div>
             </div>
 
-            <div class="form-group">
-                <label for="email">Email Address</label>
-                <input type="email" name="email" id="email" class="form-input" 
-                       value="{{ old('email', $user->email) }}" required autocomplete="email" 
-                       placeholder="e.g. johndoe@example.com">
-            </div>
-
-            <div class="form-group">
-                <label for="phone_number">Phone Number</label>
-                <input type="text" name="phone_number" id="phone_number" class="form-input" 
-                       value="{{ old('phone_number', $user->phone_number) }}" required 
-                       placeholder="e.g. 60123456789" maxlength="11" pattern="[0-9]{1,11}" 
-                       title="Phone number must be between 1 and 11 digits containing only numbers" 
-                       oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-                <span style="font-size: 0.8rem; color: #64748b; margin-top: 6px; display: block;">
-                    Must be between 1 and 11 numeric digits without spaces or hyphens.
-                </span>
-            </div>
-
-            <div style="margin-top: 32px; border-top: 1px solid #f1f5f9; padding-top: 24px;">
-                <button type="submit" class="btn-submit">
-                    <i class="bi bi-save2"></i> Update Profile Settings
-                </button>
-            </div>
-        </form>
-    </div>
-
-    <!-- Right Column: Avatar Widget & Security Settings -->
-    <div>
-        
-        <!-- Interactive Profile Card Widget -->
-        <div class="profile-avatar-card">
-            <div class="avatar-large">
-                {{ strtoupper(substr($user->name ?? 'C', 0, 1)) }}
-            </div>
-            <h3>{{ $user->name }}</h3>
-            <p>{{ $user->email }}</p>
-            <span class="badge-role">Customer Account</span>
-        </div>
-
-        <!-- Change Password Card Panel -->
-        <div class="modern-panel">
-            <h2><i class="bi bi-shield-lock"></i> Security & Password</h2>
-            
-            <form action="{{ route('customer.account.password') }}" method="POST">
+            <form action="{{ route('customer.account.update') }}" method="POST">
                 @csrf
                 @method('PUT')
-                
-                <div class="form-group">
-                    <label for="current_password">Current Password</label>
-                    <input type="password" name="current_password" id="current_password" class="form-input" 
-                           required autocomplete="current-password" placeholder="••••••••">
-                </div>
+                <div class="account-card-body">
+                    <div class="account-form-grid">
+                        <div class="account-field full">
+                            <label for="name">Full name</label>
+                            <div class="account-input-wrap">
+                                <i class="bi bi-person account-input-icon"></i>
+                                <input class="account-input @error('name') is-invalid @enderror" type="text" name="name" id="name"
+                                    value="{{ old('name', $user->name) }}" required autocomplete="name">
+                            </div>
+                            @error('name')<span class="account-error">{{ $message }}</span>@enderror
+                        </div>
 
-                <div class="form-group">
-                    <label for="password">New Password</label>
-                    <input type="password" name="password" id="password" class="form-input" 
-                           required autocomplete="new-password" placeholder="Min. 6 characters">
-                </div>
+                        <div class="account-field">
+                            <label for="email">Email address</label>
+                            <div class="account-input-wrap">
+                                <i class="bi bi-envelope account-input-icon"></i>
+                                <input class="account-input @error('email') is-invalid @enderror" type="email" name="email" id="email"
+                                    value="{{ old('email', $user->email) }}" required autocomplete="email">
+                            </div>
+                            @error('email')<span class="account-error">{{ $message }}</span>@enderror
+                        </div>
 
-                <div class="form-group">
-                    <label for="password_confirmation">Confirm New Password</label>
-                    <input type="password" name="password_confirmation" id="password_confirmation" class="form-input" 
-                           required autocomplete="new-password" placeholder="Confirm new password">
-                </div>
+                        <div class="account-field">
+                            <label for="phone_number">Phone number</label>
+                            <div class="account-input-wrap">
+                                <i class="bi bi-telephone account-input-icon"></i>
+                                <input class="account-input @error('phone_number') is-invalid @enderror" type="tel" name="phone_number" id="phone_number"
+                                    value="{{ old('phone_number', $user->phone_number) }}" required inputmode="numeric" autocomplete="tel"
+                                    maxlength="11" pattern="[0-9]{1,11}" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                            </div>
+                            <span class="account-hint">Up to 11 digits, without spaces or hyphens.</span>
+                            @error('phone_number')<span class="account-error">{{ $message }}</span>@enderror
+                        </div>
+                    </div>
 
-                <div style="margin-top: 28px; border-top: 1px solid #f1f5f9; padding-top: 20px;">
-                    <button type="submit" class="btn-submit purple-gradient" style="width: 100%;">
-                        <i class="bi bi-key"></i> Update Password
-                    </button>
+                    <div class="account-actions">
+                        <button type="submit" class="account-button">
+                            <i class="bi bi-check2"></i> Save changes
+                        </button>
+                    </div>
                 </div>
             </form>
-        </div>
+        </section>
 
+        <aside class="account-side">
+            <section class="account-card" aria-label="Customer profile summary">
+                <div class="account-profile-summary">
+                    <div class="account-avatar">{{ strtoupper(substr($user->name ?? 'C', 0, 1)) }}</div>
+                    <h2>{{ $user->name }}</h2>
+                    <p>{{ $user->email }}</p>
+                    <div class="account-meta">
+                        <i class="bi bi-person-check"></i>
+                        <span>Customer account</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="account-card" aria-labelledby="security-heading">
+                <div class="account-card-header">
+                    <span class="account-card-icon"><i class="bi bi-shield-lock"></i></span>
+                    <div>
+                        <h2 id="security-heading">Password & security</h2>
+                        <p>Update your sign-in password.</p>
+                    </div>
+                </div>
+
+                <form action="{{ route('customer.account.password') }}" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <div class="account-card-body">
+                        <div class="security-note">
+                            <i class="bi bi-info-circle"></i>
+                            <span>Use at least 6 characters and avoid passwords you use elsewhere.</span>
+                        </div>
+
+                        <div class="account-field">
+                            <label for="current_password">Current password</label>
+                            <div class="account-input-wrap">
+                                <i class="bi bi-lock account-input-icon"></i>
+                                <input class="account-input @error('current_password') is-invalid @enderror" type="password"
+                                    name="current_password" id="current_password" required autocomplete="current-password">
+                                <button class="password-toggle" type="button" data-password-toggle="current_password" aria-label="Show current password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                            @error('current_password')<span class="account-error">{{ $message }}</span>@enderror
+                        </div>
+
+                        <div class="account-field" style="margin-top: 17px;">
+                            <label for="password">New password</label>
+                            <div class="account-input-wrap">
+                                <i class="bi bi-key account-input-icon"></i>
+                                <input class="account-input @error('password') is-invalid @enderror" type="password"
+                                    name="password" id="password" required minlength="6" autocomplete="new-password">
+                                <button class="password-toggle" type="button" data-password-toggle="password" aria-label="Show new password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                            @error('password')<span class="account-error">{{ $message }}</span>@enderror
+                        </div>
+
+                        <div class="account-field" style="margin-top: 17px;">
+                            <label for="password_confirmation">Confirm new password</label>
+                            <div class="account-input-wrap">
+                                <i class="bi bi-key account-input-icon"></i>
+                                <input class="account-input" type="password" name="password_confirmation" id="password_confirmation"
+                                    required minlength="6" autocomplete="new-password">
+                                <button class="password-toggle" type="button" data-password-toggle="password_confirmation" aria-label="Show password confirmation">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="account-actions">
+                            <button type="submit" class="account-button">
+                                <i class="bi bi-shield-check"></i> Update password
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </section>
+        </aside>
     </div>
-
 </div>
 
+<script>
+    document.querySelectorAll('[data-password-toggle]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            const input = document.getElementById(this.dataset.passwordToggle);
+            const isHidden = input.type === 'password';
+            input.type = isHidden ? 'text' : 'password';
+            this.innerHTML = isHidden ? '<i class="bi bi-eye-slash"></i>' : '<i class="bi bi-eye"></i>';
+            this.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+        });
+    });
+</script>
 @endsection

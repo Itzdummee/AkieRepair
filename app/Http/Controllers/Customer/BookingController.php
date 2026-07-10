@@ -6,14 +6,16 @@ use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\BookingTimeline;
 use App\Models\Device;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class BookingController extends Controller
 {
     public function create()
     {   
-        $devices = Device::latest()->get();
+        $devices = Device::where('is_active', true)->latest()->get();
 
         return view('customer.booking-create', compact('devices'));
     }
@@ -21,16 +23,45 @@ class BookingController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'device_id' => 'required|exists:devices,id',
+            'device_id' => [
+                'required',
+                Rule::exists('devices', 'id')->where('is_active', true),
+            ],
             'problem_description' => 'required|string',
-            'visit_date' => 'nullable|date',
+            'visit_date' => 'required|date|after_or_equal:today',
+            'alternative_visit_date' => 'nullable|date|after_or_equal:today|different:visit_date',
         ]);
+
+        $device = Device::findOrFail($request->device_id);
+        $visitDate = $request->visit_date;
+        $usedAlternativeDate = false;
+
+        if ($this->availableTechniciansCount($visitDate, $device) === 0) {
+            if (! $request->filled('alternative_visit_date')) {
+                return back()
+                    ->withErrors([
+                        'visit_date' => 'No technician is available on this date. Please add another date for your site visit.',
+                    ])
+                    ->withInput();
+            }
+
+            if ($this->availableTechniciansCount($request->alternative_visit_date, $device) === 0) {
+                return back()
+                    ->withErrors([
+                        'alternative_visit_date' => 'No technician is available on the alternative date. Please choose another date.',
+                    ])
+                    ->withInput();
+            }
+
+            $visitDate = $request->alternative_visit_date;
+            $usedAlternativeDate = true;
+        }
 
         $booking = Booking::create([
             'customer_id' => Auth::id(),
             'device_id' => $request->device_id,
             'problem_description' => $request->problem_description,
-            'visit_date' => $request->visit_date,
+            'visit_date' => $visitDate,
             'status' => 'Visit Requested',
         ]);
 
@@ -43,12 +74,31 @@ class BookingController extends Controller
 
         return redirect()
             ->route('customer.booking.status')
-            ->with('success', 'Booking request submitted successfully.');
+            ->with(
+                'success',
+                $usedAlternativeDate
+                    ? 'Your preferred date was unavailable, so your booking was submitted with the alternative visit date.'
+                    : 'Booking request submitted successfully.'
+            );
+    }
+
+    private function availableTechniciansCount(string $date, Device $device): int
+    {
+        return User::where('role', 'technician')
+            ->where('approval_status', 'approved')
+            ->where('is_active', true)
+            ->when($device->type, function ($query) use ($device) {
+                $query->whereRaw('LOWER(specialty) LIKE ?', ['%' . strtolower($device->type) . '%']);
+            })
+            ->whereDoesntHave('availabilities', function ($query) use ($date) {
+                $query->coveringDate($date);
+            })
+            ->count();
     }
 
     public function status()
     {
-        $bookings = Booking::with(['device', 'technician', 'timelines', 'repair'])
+        $bookings = Booking::with(['device', 'technician', 'timelines', 'repair', 'review'])
             ->where('customer_id', Auth::id())
             ->whereNotIn('status', ['Repair Completed', 'Quotation Rejected', 'Cancelled'])
             ->latest()
@@ -59,7 +109,7 @@ class BookingController extends Controller
 
     public function history()
     {
-        $bookings = Booking::with(['device', 'technician', 'timelines', 'repair'])
+        $bookings = Booking::with(['device', 'technician', 'timelines', 'repair', 'review'])
             ->where('customer_id', Auth::id())
             ->whereIn('status', ['Repair Completed', 'Quotation Rejected', 'Cancelled'])
             ->latest()
@@ -75,7 +125,7 @@ class BookingController extends Controller
             abort(403);
         }
 
-        $booking->load(['device', 'technician', 'timelines', 'repair']);
+        $booking->load(['device', 'technician', 'timelines', 'repair', 'review']);
         $from = in_array($booking->status, ['Repair Completed', 'Quotation Rejected', 'Cancelled'])
             ? 'history'
             : 'status';

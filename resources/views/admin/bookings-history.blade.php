@@ -279,6 +279,7 @@
                         <th>Device Details</th>
                         <th>Assigned Inspector</th>
                         <th>Visit Date</th>
+                        <th>Finished Date</th>
                         <th>Workflow Status</th>
                         <th>Quote Price</th>
                         <th style="width: 120px; text-align: center;">Actions</th>
@@ -321,6 +322,11 @@
                             <td style="font-weight: 500; color: #4b5563;">
                                 {{ $booking->visit_date ? \Carbon\Carbon::parse($booking->visit_date)->format('d M, Y') : '-' }}
                             </td>
+
+                            <!-- Repair Finished Date -->
+                            <td style="font-weight: 500; color: #4b5563;">
+                                {{ $booking->repair_finished_date ? \Carbon\Carbon::parse($booking->repair_finished_date)->format('d M, Y') : '-' }}
+                            </td>
                             
                             <!-- State Color Badges -->
                             <td>
@@ -338,7 +344,7 @@
                                         $badgeClass = 'badge-accepted';
                                     } elseif ($statusVal === 'Repair In Progress') {
                                         $badgeClass = 'badge-inprogress';
-                                    } elseif ($statusVal === 'Repair Completed') {
+                                    } elseif (in_array($statusVal, ['Repair Finished', 'Repair Completed'])) {
                                         $badgeClass = 'badge-completed';
                                     } elseif ($statusVal === 'Pickup Scheduled') {
                                         $badgeClass = 'badge-scheduled';
@@ -385,7 +391,8 @@
 <script>
     $(document).ready(function () {
         $('#bookingHistoryTable').DataTable({
-            pageLength: 8,
+            pageLength: 10,
+            order: [[0, 'desc']],
             ordering: true,
             searching: true,
             responsive: true,

@@ -14,6 +14,11 @@ class Device extends Model
         'capacity',
         'capacity_unit',
         'image',
+        'is_active',
+    ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
     ];
 
     public function repairs()

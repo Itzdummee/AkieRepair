@@ -103,19 +103,14 @@ class TechnicianController extends Controller
 
     public function destroy(User $user)
     {
-        if ($user->assignedBookings()->exists() || $user->availabilities()->exists()) {
-            return back()->withErrors([
-                'delete' => 'Cannot delete technician because this technician is still linked to bookings or availability records.',
-            ]);
-        }
+        $user->update([
+            'is_active' => ! $user->is_active,
+        ]);
 
-        if ($user->profile_image) {
-            $oldPath = str_replace('storage/', 'public/', $user->profile_image);
-            \Illuminate\Support\Facades\Storage::delete($oldPath);
-        }
+        $message = $user->is_active
+            ? 'Technician activated successfully.'
+            : 'Technician deactivated successfully.';
 
-        $user->delete();
-
-        return back()->with('delete', 'Technician deleted successfully.');
+        return back()->with('delete', $message);
     }
 }

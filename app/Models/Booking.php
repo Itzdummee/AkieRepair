@@ -19,11 +19,19 @@ class Booking extends Model
         'quotation_status',
         'quotation_pdf',
         'pickup_date',
+        'repair_finished_date',
         'status',
         'payment_status',
         'amount_paid',
         'payment_session_id',
         'payment_date',
+    ];
+
+    protected $casts = [
+        'visit_date' => 'date',
+        'pickup_date' => 'date',
+        'repair_finished_date' => 'date',
+        'payment_date' => 'datetime',
     ];
 
     public function customer()
@@ -44,6 +52,11 @@ class Booking extends Model
     public function timelines()
     {
         return $this->hasMany(BookingTimeline::class);
+    }
+
+    public function review()
+    {
+        return $this->hasOne(BookingReview::class);
     }
     
     public function repair()

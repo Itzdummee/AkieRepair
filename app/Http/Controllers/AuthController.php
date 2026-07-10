@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\CustomerRegisteredAdminMail;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Throwable;
 
 class AuthController extends Controller
 {
@@ -36,7 +40,7 @@ class AuthController extends Controller
 
         $newId = $prefix . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
 
-        User::create([
+        $customer = User::create([
             'id' => $newId,
             'name' => $request->name,
             'email' => $request->email,
@@ -46,6 +50,8 @@ class AuthController extends Controller
             'email_verified_at' => null,
             'password' => Hash::make($request->password),
         ]);
+
+        $this->sendNewCustomerNotificationToAdmins($customer);
 
         return redirect()->route('login')
             ->with('success', 'Account created successfully. Please wait for admin approval.');
@@ -59,6 +65,15 @@ class AuthController extends Controller
         ]);
 
         $user = User::where('email', $request->email)->first();
+
+        if (
+            $user &&
+            ! $user->is_active
+        ) {
+            return back()->withErrors([
+                'email' => 'Your account is currently deactivated. Please contact admin to reactivate it.',
+            ])->withInput();
+        }
 
         if (
             $user &&
@@ -101,5 +116,30 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
 
         return redirect()->route('customer.home');
+    }
+
+    private function sendNewCustomerNotificationToAdmins(User $customer): void
+    {
+        $customerId = $customer->id;
+
+        dispatch(function () use ($customerId) {
+            try {
+                $customer = User::find($customerId);
+
+                if (! $customer) {
+                    return;
+                }
+
+                $admins = User::where('role', 'admin')
+                    ->whereNotNull('email')
+                    ->pluck('email');
+
+                foreach ($admins as $adminEmail) {
+                    Mail::to($adminEmail)->send(new CustomerRegisteredAdminMail($customer));
+                }
+            } catch (Throwable $e) {
+                Log::error('New customer admin notification failed for ' . $customerId . ': ' . $e->getMessage());
+            }
+        })->afterResponse();
     }
 }

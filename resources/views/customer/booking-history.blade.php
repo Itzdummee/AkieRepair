@@ -296,7 +296,7 @@
     }
 
     .hist-col-action {
-        width: 115px;
+        width: 190px;
     }
 
     .hist-text-left {
@@ -384,6 +384,13 @@
         color: #4b5563;
     }
 
+    .hist-action-stack {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
     .hist-detail-btn {
         display: inline-flex;
         align-items: center;
@@ -404,6 +411,28 @@
         background: #7c3aed;
         color: #fff;
         border-color: #7c3aed;
+    }
+
+    .hist-review-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        background: #dcfce7;
+        color: #166534;
+        border: 1px solid #bbf7d0;
+        border-radius: 8px;
+        padding: 7px 12px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .hist-review-btn:hover {
+        background: #16a34a;
+        color: #fff;
+        border-color: #16a34a;
     }
 
     .hist-empty-block {
@@ -609,9 +638,17 @@
                     </td>
 
                     <td class="hist-text-center">
-                        <a href="{{ route('customer.booking.show', $booking->id) }}" class="hist-detail-btn">
-                            <i class="bi bi-eye-fill"></i> View
-                        </a>
+                        <div class="hist-action-stack">
+                            <a href="{{ route('customer.booking.show', $booking->id) }}" class="hist-detail-btn">
+                                <i class="bi bi-eye-fill"></i> View
+                            </a>
+
+                            @if($booking->status === 'Repair Completed' && $booking->payment_status === 'Paid' && ! $booking->review)
+                                <a href="{{ route('customer.review.create', $booking->id) }}" class="hist-review-btn">
+                                    <i class="bi bi-star-fill"></i> Review
+                                </a>
+                            @endif
+                        </div>
                     </td>
                 </tr>
             @endforeach

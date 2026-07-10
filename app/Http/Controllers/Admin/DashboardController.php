@@ -71,10 +71,16 @@ class DashboardController extends Controller
             $salesRevenue->push($revenue);
         }
 
-        // Fetch device distributions
-        $deviceDistribution = Device::select('type', DB::raw('count(*) as count'))
-            ->groupBy('type')
+        // Fetch repair device type distribution across all bookings
+        $repairDeviceDistribution = Booking::query()
+            ->join('devices', 'bookings.device_id', '=', 'devices.id')
+            ->select('devices.type', DB::raw('count(bookings.id) as count'))
+            ->groupBy('devices.type')
+            ->orderByDesc('count')
             ->get();
+
+        $totalRepairDeviceBookings = $repairDeviceDistribution->sum('count');
+        $totalRepairDeviceTypes = $repairDeviceDistribution->count();
 
         return view('admin.dashboard', compact(
             'totalCustomers',
@@ -91,7 +97,9 @@ class DashboardController extends Controller
             'months',
             'bookingCounts',
             'salesRevenue',
-            'deviceDistribution'
+            'repairDeviceDistribution',
+            'totalRepairDeviceBookings',
+            'totalRepairDeviceTypes'
         ));
     }
 }

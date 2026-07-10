@@ -15,6 +15,11 @@ class Repair extends Model
         'warranty_period',
         'duration',
         'image',
+        'is_active',
+    ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
     ];
 
     public function service()

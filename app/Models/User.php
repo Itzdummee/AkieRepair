@@ -29,11 +29,17 @@ class User extends Authenticatable
         'email_verified_at',
         'specialty',
         'profile_image',
+        'is_active',
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
+    ];
+
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'is_active' => 'boolean',
     ];
     
     public function availabilities()
@@ -44,6 +50,11 @@ class User extends Authenticatable
     public function bookings()
     {
         return $this->hasMany(\App\Models\Booking::class, 'customer_id');
+    }
+
+    public function bookingReviews()
+    {
+        return $this->hasMany(\App\Models\BookingReview::class, 'customer_id');
     }
 
     public function assignedBookings()

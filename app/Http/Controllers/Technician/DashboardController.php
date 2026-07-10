@@ -9,12 +9,17 @@ use App\Models\BookingTimeline;
 use App\Models\TechnicianAvailability;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        $bookings = Booking::with(['customer', 'device.repairs', 'timelines'])
+        $bookings = Booking::with([
+            'customer',
+            'device.repairs' => fn ($query) => $query->where('is_active', true),
+            'timelines',
+        ])
             ->where('technician_id', Auth::id())
             ->where('status', 'Technician Assigned')
             ->latest()
@@ -50,36 +55,88 @@ class DashboardController extends Controller
     }
     
 
+    public function showInspection(Booking $booking)
+    {
+        if ($booking->technician_id !== Auth::id()) {
+            abort(403, 'Unauthorized');
+        }
+
+        if ($booking->status !== 'Technician Assigned') {
+            return redirect()
+                ->route('technician.dashboard')
+                ->with('error', 'This booking is no longer awaiting inspection.');
+        }
+
+        $booking->load([
+            'customer',
+            'device.repairs' => fn ($query) => $query->where('is_active', true),
+            'timelines' => function ($q) {
+                $q->latest();
+            },
+        ]);
+
+        return view('technician.inspection-detail', compact('booking'));
+    }
+
     public function updateInspection(Request $request, Booking $booking)
-{
-    $request->validate([
-        'repair_ids' => 'required|array',
-        'repair_ids.*' => 'exists:repairs,id',
-    ]);
+    {
+        if ($booking->technician_id !== Auth::id()) {
+            abort(403, 'Unauthorized');
+        }
 
-    $repairs = Repair::whereIn('id', $request->repair_ids)->get();
+        $request->validate([
+            'repair_ids' => 'nullable|array',
+            'repair_ids.*' => [
+                Rule::exists('repairs', 'id')
+                    ->where('device_id', $booking->device_id)
+                    ->where('is_active', true),
+            ],
+            'uncovered_problem_remark' => 'nullable|string|max:1000',
+        ]);
 
-    $repairNames = $repairs->pluck('repair_type')->implode(', ');
+        $repairIds = $request->input('repair_ids', []);
+        $remark = trim((string) $request->input('uncovered_problem_remark'));
 
-    $totalPrice = $repairs->sum('price');
+        if (empty($repairIds) && $remark === '') {
+            return back()
+                ->withErrors(['repair_ids' => 'Select at least one priced repair or add a remark for an uncovered problem.'])
+                ->withInput();
+        }
 
-    $booking->update([
-        'inspection_report' => $repairNames,
-        'quotation_price' => $totalPrice,
-        'status' => 'Inspection Completed',
-    ]);
+        $repairs = Repair::whereIn('id', $repairIds)
+            ->where('device_id', $booking->device_id)
+            ->where('is_active', true)
+            ->get();
+        $repairNames = $repairs->pluck('repair_type')->implode(', ');
+        $totalPrice = $repairs->sum('price');
 
-    BookingTimeline::create([
-        'booking_id' => $booking->id,
-        'title' => 'Inspection Completed',
-        'description' => 'Technician completed inspection and submitted detected repair problems.',
-        'status' => 'Completed',
-    ]);
+        $reportParts = [];
+        if ($repairNames !== '') {
+            $reportParts[] = 'Covered repair(s): ' . $repairNames;
+        }
+        if ($remark !== '') {
+            $reportParts[] = 'Uncovered problem remark: ' . $remark;
+        }
 
-    return redirect()
-        ->route('technician.dashboard')
-        ->with('success', 'Inspection report submitted successfully.');
-}
+        $booking->update([
+            'inspection_report' => implode("\n", $reportParts),
+            'quotation_price' => $totalPrice,
+            'status' => 'Inspection Completed',
+        ]);
+
+        BookingTimeline::create([
+            'booking_id' => $booking->id,
+            'title' => 'Inspection Completed',
+            'description' => $remark !== ''
+                ? 'Technician completed inspection and added a remark for an uncovered problem.'
+                : 'Technician completed inspection and submitted detected repair problems.',
+            'status' => 'Completed',
+        ]);
+
+        return redirect()
+            ->route('technician.dashboard')
+            ->with('success', 'Inspection report submitted successfully.');
+    }
 
     public function updateProgress(Request $request, Booking $booking)
     {
@@ -104,15 +161,21 @@ class DashboardController extends Controller
 
     public function finishRepair(Request $request, Booking $booking)
     {
-        $request->validate([
-            'note' => 'nullable|string',
-            'proof_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
-        ]);
-
         // Verify technician owns this booking
         if ($booking->technician_id !== Auth::id()) {
             abort(403, 'Unauthorized');
         }
+
+        $finishedDateRules = ['required', 'date', 'before_or_equal:today'];
+        if ($booking->visit_date) {
+            $finishedDateRules[] = 'after_or_equal:' . $booking->visit_date->toDateString();
+        }
+
+        $request->validate([
+            'note' => 'nullable|string',
+            'repair_finished_date' => $finishedDateRules,
+            'proof_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+        ]);
 
         $imagePath = null;
         if ($request->hasFile('proof_image')) {
@@ -124,12 +187,14 @@ class DashboardController extends Controller
 
         $booking->update([
             'status' => 'Repair Finished',
+            'repair_finished_date' => $request->repair_finished_date,
         ]);
 
         BookingTimeline::create([
             'booking_id' => $booking->id,
             'title' => 'Repair Finished',
-            'description' => $request->note ?? 'Technician has completed the repair work. Awaiting customer payment.',
+            'description' => ($request->note ?? 'Technician has completed the repair work. Awaiting customer payment.')
+                . ' Finished on ' . \Carbon\Carbon::parse($request->repair_finished_date)->format('d M Y') . '.',
             'status' => 'Completed',
             'image' => $imagePath,
         ]);
@@ -141,12 +206,14 @@ class DashboardController extends Controller
     {
         $request->validate([
             'unavailable_date' => 'required|date|after_or_equal:today',
+            'unavailable_end_date' => 'nullable|date|after_or_equal:unavailable_date',
             'reason' => 'nullable|string|max:255',
         ]);
 
         TechnicianAvailability::create([
             'technician_id' => Auth::id(),
             'unavailable_date' => $request->unavailable_date,
+            'unavailable_end_date' => $request->unavailable_end_date ?: $request->unavailable_date,
             'reason' => $request->reason,
         ]);
 
@@ -155,21 +222,31 @@ class DashboardController extends Controller
 
     public function updateAvailability(Request $request, TechnicianAvailability $availability)
     {
-    $request->validate([
-        'unavailable_date' => 'required|date|after_or_equal:today',
-        'reason' => 'nullable|string|max:255',
-    ]);
+        if ($availability->technician_id !== Auth::id()) {
+            abort(403, 'Unauthorized');
+        }
 
-    $availability->update([
-        'unavailable_date' => $request->unavailable_date,
-        'reason' => $request->reason,
-    ]);
+        $request->validate([
+            'unavailable_date' => 'required|date|after_or_equal:today',
+            'unavailable_end_date' => 'nullable|date|after_or_equal:unavailable_date',
+            'reason' => 'nullable|string|max:255',
+        ]);
 
-    return back()->with('success', 'Availability updated successfully.');
+        $availability->update([
+            'unavailable_date' => $request->unavailable_date,
+            'unavailable_end_date' => $request->unavailable_end_date ?: $request->unavailable_date,
+            'reason' => $request->reason,
+        ]);
+
+        return back()->with('success', 'Availability updated successfully.');
     }
 
     public function deleteAvailability(TechnicianAvailability $availability)
     {
+        if ($availability->technician_id !== Auth::id()) {
+            abort(403, 'Unauthorized');
+        }
+
         $availability->delete();
 
         return back()->with('delete', 'Unavailable date removed.');
@@ -212,9 +289,13 @@ class DashboardController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        $booking->load(['customer', 'device.repairs', 'timelines' => function($q) {
-            $q->orderBy('created_at', 'desc');
-        }]);
+        $booking->load([
+            'customer',
+            'device.repairs' => fn ($query) => $query->where('is_active', true),
+            'timelines' => function($q) {
+                $q->orderBy('created_at', 'desc');
+            },
+        ]);
 
         return view('technician.job-detail', compact('booking'));
     }
