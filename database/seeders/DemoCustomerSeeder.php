@@ -19,7 +19,7 @@ class DemoCustomerSeeder extends Seeder
                 ['id' => 'C' . str_pad($i, 3, '0', STR_PAD_LEFT)],
                 [
                     'name' => str($faker->firstName())->before(' ')->toString(),
-                    'email' => "customer0{$i}@gmail.com",
+                    'email' => "customer{$i}@gmail.com",
                     'phone_number' => '011' . str_pad((string) $i, 8, '0', STR_PAD_LEFT),
                     'role' => 'customer',
                     'approval_status' => 'approved',
