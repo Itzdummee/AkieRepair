@@ -13,28 +13,28 @@ class DemoTechnicianSeeder extends Seeder
         $technicians = [
             [
                 'id' => 'T001',
-                'name' => 'Aiman Smartphone Specialist',
+                'name' => 'Aiman',
                 'email' => 'technician01@gmail.com',
                 'phone_number' => '0121000001',
                 'specialty' => 'Smartphone',
             ],
             [
                 'id' => 'T002',
-                'name' => 'Balqis Television Specialist',
+                'name' => 'Balqis',
                 'email' => 'technician02@gmail.com',
                 'phone_number' => '0121000002',
                 'specialty' => 'Television',
             ],
             [
                 'id' => 'T003',
-                'name' => 'Chen Refrigerator Specialist',
+                'name' => 'Chen',
                 'email' => 'technician03@gmail.com',
                 'phone_number' => '0121000003',
                 'specialty' => 'Refrigerator',
             ],
             [
                 'id' => 'T004',
-                'name' => 'Danish Washing Machine Specialist',
+                'name' => 'Danish',
                 'email' => 'technician04@gmail.com',
                 'phone_number' => '0121000004',
                 'specialty' => 'Washing Machine',
@@ -52,11 +52,11 @@ class DemoTechnicianSeeder extends Seeder
                     'approval_status' => 'approved',
                     'email_verified_at' => now(),
                     'specialty' => $technician['specialty'],
-                    'password' => Hash::make('password'),
+                    'password' => Hash::make('Paswod'),
                 ]
             );
         }
 
-        $this->command?->info('4 demo technicians seeded by device specialty. Password: password');
+        $this->command?->info('4 demo technicians seeded by device specialty. Password: Paswod');
     }
 }

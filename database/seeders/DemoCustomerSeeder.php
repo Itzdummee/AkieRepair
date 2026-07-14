@@ -24,11 +24,11 @@ class DemoCustomerSeeder extends Seeder
                     'role' => 'customer',
                     'approval_status' => 'approved',
                     'email_verified_at' => now(),
-                    'password' => Hash::make('password'),
+                    'password' => Hash::make('Paswod'),
                 ]
             );
         }
 
-        $this->command?->info('150 demo customers seeded. Email starts at customer1@gmail.com, password: password');
+        $this->command?->info('150 demo customers seeded. Email starts at customer1@gmail.com, password: Paswod');
     }
 }
