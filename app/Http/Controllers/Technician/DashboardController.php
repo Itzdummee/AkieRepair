@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Technician;
 
+use App\Services\CloudinaryService;
+
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\Repair;
@@ -159,7 +161,7 @@ class DashboardController extends Controller
         return back()->with('success', 'Repair progress updated successfully.');
     }
 
-    public function finishRepair(Request $request, Booking $booking)
+    public function finishRepair(Request $request, Booking $booking, CloudinaryService $cloudinary)
     {
         // Verify technician owns this booking
         if ($booking->technician_id !== Auth::id()) {
@@ -179,10 +181,11 @@ class DashboardController extends Controller
 
         $imagePath = null;
         if ($request->hasFile('proof_image')) {
-            $file = $request->file('proof_image');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $file->storeAs('public/proof_images', $fileName);
-            $imagePath = 'storage/proof_images/' . $fileName;
+            $imagePath = $cloudinary->upload(
+                $request->file('proof_image'),
+                config('services.cloudinary.repair_folder'),
+                'booking_'.$booking->id.'_'.time()
+            );
         }
 
         $booking->update([

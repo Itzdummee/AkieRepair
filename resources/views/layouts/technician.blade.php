@@ -709,7 +709,13 @@
         <div class="logout-box">
             <div class="user-row">
                 <div class="avatar">
-                    {{ strtoupper(substr(Auth::user()->name ?? 'T', 0, 1)) }}
+                    @if(Auth::user()->profile_image)
+                        <img src="{{ str_starts_with(Auth::user()->profile_image, 'http') ? Auth::user()->profile_image : asset(Auth::user()->profile_image) }}"
+                             alt="{{ Auth::user()->name }}"
+                             style="width:100%;height:100%;object-fit:cover;border-radius:inherit;">
+                    @else
+                        {{ strtoupper(substr(Auth::user()->name ?? 'T', 0, 1)) }}
+                    @endif
                 </div>
                 <div class="user-text">
                     <strong>{{ Auth::user()->name ?? 'Technician' }}</strong>

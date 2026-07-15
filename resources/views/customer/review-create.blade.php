@@ -193,7 +193,7 @@
     <div class="review-card">
         <div class="review-photo">
             @if($finishedImage)
-                <img src="{{ asset($finishedImage) }}" alt="Finished repair proof for booking #{{ $booking->id }}">
+                <img src="{{ str_starts_with($finishedImage, 'http') ? $finishedImage : asset($finishedImage) }}" alt="Finished repair proof for booking #{{ $booking->id }}">
             @else
                 <div class="review-photo-empty"><i class="bi bi-tools"></i></div>
             @endif

@@ -73,5 +73,32 @@ class AppServiceProvider extends ServiceProvider
 
             $view->with(compact('pendingInspectionsCount', 'activeRepairsCount'));
         });
+
+        View::composer('layouts.customer', function ($view) {
+            $actionNeededCount = 0;
+
+            try {
+                if (\Illuminate\Support\Facades\Auth::check() && Schema::hasTable('bookings')) {
+                    $actionNeededCount = Booking::where('customer_id', \Illuminate\Support\Facades\Auth::id())
+                        ->where(function ($query) {
+                            $query->where(function ($quotation) {
+                                $quotation->where('status', 'Quotation Sent')
+                                    ->where('quotation_status', 'Pending Customer Approval');
+                            })->orWhere(function ($payment) {
+                                $payment->where('status', 'Repair Finished')
+                                    ->where(function ($status) {
+                                        $status->whereNull('payment_status')
+                                            ->orWhere('payment_status', '!=', 'Paid');
+                                    });
+                            });
+                        })
+                        ->count();
+                }
+            } catch (\Exception $e) {
+                // Fail-safe during migrations, console runs, or database setup
+            }
+
+            $view->with(compact('actionNeededCount'));
+        });
     }
 }

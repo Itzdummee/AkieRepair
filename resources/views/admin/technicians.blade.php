@@ -350,7 +350,7 @@
                             <div class="tech-item-profile">
                                 <div class="tech-avatar-container">
                                     @if($technician->profile_image)
-                                        <img src="{{ asset($technician->profile_image) }}" alt="{{ $technician->name }}" class="tech-avatar">
+                                        <img src="{{ str_starts_with($technician->profile_image, 'http') ? $technician->profile_image : asset($technician->profile_image) }}" alt="{{ $technician->name }}" class="tech-avatar">
                                     @else
                                         <div class="tech-avatar-placeholder">{{ $initials }}</div>
                                     @endif
@@ -576,7 +576,7 @@
         const previewContainer = document.getElementById('imagePreviewContainer');
         const previewImage = document.getElementById('imagePreview');
         if (profileImage) {
-            previewImage.src = '/' + profileImage;
+            previewImage.src = /^https?:\/\//i.test(profileImage) ? profileImage : '/' + profileImage;
             previewContainer.style.display = 'flex';
         } else {
             previewContainer.style.display = 'none';

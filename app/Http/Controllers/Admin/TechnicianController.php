@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\CloudinaryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -17,7 +18,7 @@ class TechnicianController extends Controller
         return view('admin.technicians', compact('technicians', 'services'));
     }
 
-    public function store(Request $request)
+    public function store(Request $request, CloudinaryService $cloudinary)
     {
         $request->validate([
             'name' => 'required|string|max:255',
@@ -37,10 +38,11 @@ class TechnicianController extends Controller
 
         $profileImagePath = null;
         if ($request->hasFile('profile_image')) {
-            $file = $request->file('profile_image');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $file->storeAs('public/technicians', $fileName);
-            $profileImagePath = 'storage/technicians/' . $fileName;
+            $profileImagePath = $cloudinary->upload(
+                $request->file('profile_image'),
+                config('services.cloudinary.profile_folder'),
+                $newId
+            );
         }
 
         User::create([
@@ -59,7 +61,7 @@ class TechnicianController extends Controller
         return back()->with('success', 'Technician added successfully.');
     }
 
-    public function update(Request $request, User $user)
+    public function update(Request $request, User $user, CloudinaryService $cloudinary)
     {
         $request->validate([
             'name' => 'required|string|max:255',
@@ -85,15 +87,11 @@ class TechnicianController extends Controller
         }
 
         if ($request->hasFile('profile_image')) {
-            // delete old image if exists
-            if ($user->profile_image) {
-                $oldPath = str_replace('storage/', 'public/', $user->profile_image);
-                \Illuminate\Support\Facades\Storage::delete($oldPath);
-            }
-            $file = $request->file('profile_image');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $file->storeAs('public/technicians', $fileName);
-            $data['profile_image'] = 'storage/technicians/' . $fileName;
+            $data['profile_image'] = $cloudinary->upload(
+                $request->file('profile_image'),
+                config('services.cloudinary.profile_folder'),
+                $user->id
+            );
         }
 
         $user->update($data);

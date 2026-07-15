@@ -1735,7 +1735,7 @@
                         <article class="comment-card">
                             <div class="comment-image">
                                 @if($finishedImage)
-                                    <img src="{{ asset($finishedImage) }}" alt="Finished repair proof for {{ $deviceLabel }}">
+                                    <img src="{{ str_starts_with($finishedImage, 'http') ? $finishedImage : asset($finishedImage) }}" alt="Finished repair proof for {{ $deviceLabel }}">
                                 @else
                                     <div class="comment-image-empty"><i class="bi bi-tools"></i></div>
                                 @endif

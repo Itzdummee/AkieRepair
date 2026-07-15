@@ -186,6 +186,19 @@
     .action-item:last-child { margin-bottom: 0; }
     .action-item p { margin: 0 0 12px 0; font-size: 0.95rem; color: #334155; }
     .action-item strong { color: #0f172a; }
+    .action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: white;
+        padding: 7px 13px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    .action-btn.quote { background: #3b82f6; }
+    .action-btn.payment { background: #ea580c; }
 </style>
 
 <div class="modern-header">
@@ -295,16 +308,19 @@
     <div class="modern-panel">
         <h2><i class="bi bi-exclamation-circle"></i> Action Required</h2>
         
-        @php
-            $actionableBookings = $bookings->where('status', 'Quotation Sent')->take(3);
-        @endphp
-
         @forelse($actionableBookings as $booking)
             <div class="action-item">
-                <p>Quotation is ready for <strong>Booking #{{ $booking->id }}</strong> (RM {{ number_format($booking->quotation_price, 2) }}). Please review and accept to proceed with the repair.</p>
-                <a href="{{ route('customer.booking.status') }}" style="display: inline-block; background: #3b82f6; color: white; padding: 6px 12px; border-radius: 8px; text-decoration: none; font-size: 0.85rem; font-weight: 600;">
-                    Review Quotation
-                </a>
+                @if($booking->status === 'Quotation Sent')
+                    <p>Quotation is ready for <strong>Booking #{{ $booking->id }}</strong> (RM {{ number_format($booking->quotation_price, 2) }}). Please approve or reject it so the repair can proceed.</p>
+                    <a href="{{ route('customer.booking.show', $booking->id) }}" class="action-btn quote">
+                        <i class="bi bi-file-earmark-check"></i> Review Quotation
+                    </a>
+                @else
+                    <p>Payment is required for <strong>Booking #{{ $booking->id }}</strong> (RM {{ number_format($booking->quotation_price, 2) }}). The repair is finished and ready for payment.</p>
+                    <a href="{{ route('customer.payment.show', $booking->id) }}" class="action-btn payment">
+                        <i class="bi bi-credit-card"></i> Make Payment
+                    </a>
+                @endif
             </div>
         @empty
             <div style="text-align: center; padding: 24px 0; color: #6b7280;">

@@ -144,6 +144,28 @@
             display:block;
         }
 
+        .badge-notify{
+            min-width:16px;
+            height:16px;
+            padding:2px 6px;
+            border-radius:999px;
+            background:#ef4444;
+            color:#fff;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            font-size:10px;
+            font-weight:700;
+            line-height:1;
+            box-shadow:0 2px 4px rgba(239,68,68,.2);
+            animation:badgePulse 2s infinite;
+        }
+
+        @keyframes badgePulse{
+            0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.35)}
+            50%{box-shadow:0 0 0 4px rgba(239,68,68,0)}
+        }
+
         .logout-box{
             margin-top:auto;
             padding-top:20px;
@@ -218,7 +240,7 @@
         .customer-wrapper.sidebar-minimized .sidebar{width:84px;padding-left:14px;padding-right:14px}
         .customer-wrapper.sidebar-minimized .customer-main{margin-left:84px;width:calc(100% - 84px)}
         .customer-wrapper.sidebar-minimized .brand-box{justify-content:center;margin-top:20px}
-        .customer-wrapper.sidebar-minimized .brand-box>div:last-child,.customer-wrapper.sidebar-minimized .dropdown-btn>span:last-child,.customer-wrapper.sidebar-minimized .submenu,.customer-wrapper.sidebar-minimized .user-text,.customer-wrapper.sidebar-minimized .logout-icon{display:none!important}
+        .customer-wrapper.sidebar-minimized .brand-box>div:last-child,.customer-wrapper.sidebar-minimized .dropdown-btn>span:last-child,.customer-wrapper.sidebar-minimized .submenu,.customer-wrapper.sidebar-minimized .user-text,.customer-wrapper.sidebar-minimized .logout-icon,.customer-wrapper.sidebar-minimized .badge-notify{display:none!important}
         .customer-wrapper.sidebar-minimized .menu-link,.customer-wrapper.sidebar-minimized .dropdown-btn{justify-content:center!important;padding-left:8px;padding-right:8px;font-size:0}
         .customer-wrapper.sidebar-minimized .menu-left{width:100%;justify-content:center;gap:0}
         .customer-wrapper.sidebar-minimized .menu-left .icon{font-size:18px;display:grid;place-items:center;margin:0 auto}
@@ -915,15 +937,23 @@
                         <span class="icon"><i class="bi bi-calendar-check"></i></span>
                         Appointments
                     </span>
-                    <span><i class="bi bi-chevron-down" style="font-size: 11px;"></i></span>
+                    <span style="display:flex;align-items:center;gap:8px;">
+                        @if(isset($actionNeededCount) && $actionNeededCount > 0)
+                            <span class="badge-notify" title="{{ $actionNeededCount }} action needed">{{ $actionNeededCount }}</span>
+                        @endif
+                        <i class="bi bi-chevron-down" style="font-size:11px;"></i>
+                    </span>
                 </button>
 
                 <div id="bookingMenu" class="submenu {{ request()->routeIs('customer.booking.*', 'customer.payment.*', 'customer.review.*') ? 'show' : '' }}">
                     <a href="{{ route('customer.booking.create') }}" class="{{ request()->routeIs('customer.booking.create') ? 'active' : '' }}">
                         Book Appointment
                     </a>
-                    <a href="{{ route('customer.booking.status') }}" class="{{ request()->routeIs('customer.booking.status', 'customer.booking.show', 'customer.payment.*') ? 'active' : '' }}">
-                        Booking Status
+                    <a href="{{ route('customer.booking.status') }}" class="{{ request()->routeIs('customer.booking.status', 'customer.booking.show', 'customer.payment.*') ? 'active' : '' }}" style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+                        <span>Booking Status</span>
+                        @if(isset($actionNeededCount) && $actionNeededCount > 0)
+                            <span class="badge-notify" aria-label="{{ $actionNeededCount }} action needed">{{ $actionNeededCount }}</span>
+                        @endif
                     </a>
                     <a href="{{ route('customer.booking.history') }}" class="{{ request()->routeIs('customer.booking.history', 'customer.review.*') ? 'active' : '' }}">
                         Booking History

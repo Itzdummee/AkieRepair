@@ -378,8 +378,8 @@
                             <h4>{{ $timeline->title }}</h4>
                             <p>{{ $timeline->description }}</p>
                             @if($timeline->image)
-                                <a href="{{ asset($timeline->image) }}" target="_blank">
-                                    <img src="{{ asset($timeline->image) }}" alt="Proof Image" class="proof-img">
+                                <a href="{{ str_starts_with($timeline->image, 'http') ? $timeline->image : asset($timeline->image) }}" target="_blank">
+                                    <img src="{{ str_starts_with($timeline->image, 'http') ? $timeline->image : asset($timeline->image) }}" alt="Proof Image" class="proof-img">
                                 </a>
                             @endif
                             <div class="timeline-time">

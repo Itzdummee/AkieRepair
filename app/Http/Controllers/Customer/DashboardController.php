@@ -44,8 +44,21 @@ class DashboardController extends Controller
             ->where('status', 'Repair Completed')
             ->count();
 
+        $actionableBookings = $bookings
+            ->filter(function (Booking $booking) {
+                $needsQuotationApproval = $booking->status === 'Quotation Sent'
+                    && $booking->quotation_status === 'Pending Customer Approval';
+
+                $needsPayment = $booking->status === 'Repair Finished'
+                    && $booking->payment_status !== 'Paid';
+
+                return $needsQuotationApproval || $needsPayment;
+            })
+            ->values();
+
         return view('customer.dashboard', compact(
             'bookings',
+            'actionableBookings',
             'totalBookings',
             'totalSpent',
             'pendingQuotations',
