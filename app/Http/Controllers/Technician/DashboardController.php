@@ -11,6 +11,7 @@ use App\Models\BookingTimeline;
 use App\Models\TechnicianAvailability;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 
 class DashboardController extends Controller
@@ -181,11 +182,27 @@ class DashboardController extends Controller
 
         $imagePath = null;
         if ($request->hasFile('proof_image')) {
+            $proofImage = $request->file('proof_image');
+
+            Log::info('Uploading repair proof document.', [
+                'booking_id' => $booking->id,
+                'technician_id' => Auth::id(),
+                'file_name' => $proofImage->getClientOriginalName(),
+                'file_size' => $proofImage->getSize(),
+                'mime_type' => $proofImage->getMimeType(),
+            ]);
+
             $imagePath = $cloudinary->upload(
-                $request->file('proof_image'),
+                $proofImage,
                 config('services.cloudinary.repair_folder'),
                 'booking_'.$booking->id.'_'.time()
             );
+
+            Log::info('Repair proof document uploaded.', [
+                'booking_id' => $booking->id,
+                'technician_id' => Auth::id(),
+                'file_url' => $imagePath,
+            ]);
         }
 
         $booking->update([
