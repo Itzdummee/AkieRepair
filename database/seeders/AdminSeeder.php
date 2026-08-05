@@ -19,8 +19,7 @@ class AdminSeeder extends Seeder
                 'role' => 'admin',
                 'approval_status' => 'approved',
                 'email_verified_at' => now(),
-                'password' => Hash::make('Paswod123'),
-            ]
+                'password' => Hash::make('password'),            ]
         );
     }
 }

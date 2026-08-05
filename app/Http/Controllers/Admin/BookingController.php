@@ -22,10 +22,17 @@ class BookingController extends Controller
             ->get();
 
         $technicians = User::with('availabilities')
+            ->withCount([
+                'assignedBookings as in_progress_repairs_count' => function ($query) {
+                    $query->where('status', 'Repair In Progress');
+                },
+            ])
             ->where('role', 'technician')
             ->where('approval_status', 'approved')
             ->where('is_active', true)
-            ->latest()
+            ->orderBy('in_progress_repairs_count')
+            ->orderBy('name')
+            ->orderBy('id')
             ->get();
 
         return view('admin.bookings-pending', compact('bookings', 'technicians'));

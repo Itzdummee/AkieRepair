@@ -71,6 +71,7 @@ Route::middleware(['auth', 'role:customer'])->group(function () {
     Route::get('/account', [CustomerDashboardController::class, 'account'])->name('customer.account');
     Route::put('/account/profile', [CustomerDashboardController::class, 'updateProfile'])->name('customer.account.update');
     Route::put('/account/password', [CustomerDashboardController::class, 'changePassword'])->name('customer.account.password');
+    Route::put('/account/status', [CustomerDashboardController::class, 'toggleStatus'])->name('customer.account.status');
 
     Route::get('/customer/dashboard', [CustomerDashboardController::class, 'index'])
         ->name('customer.dashboard');

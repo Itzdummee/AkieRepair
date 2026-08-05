@@ -217,4 +217,26 @@ class PaymentController extends Controller
                 ->with('error', 'Payment verification failed: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Get the Stripe secret key from Laravel's services configuration.
+     */
+    private function stripeSecret(): ?string
+    {
+        $secret = config('services.stripe.secret');
+
+        return is_string($secret) && trim($secret) !== '' ? trim($secret) : null;
+    }
+
+    /**
+     * Build an absolute callback URL using the host of the current request.
+     */
+    private function absolutePaymentUrl(Request $request, string $path): string
+    {
+        if (filter_var($path, FILTER_VALIDATE_URL)) {
+            return $path;
+        }
+
+        return rtrim($request->getSchemeAndHttpHost(), '/') . '/' . ltrim($path, '/');
+    }
 }

@@ -303,13 +303,13 @@
         transform: translateY(-1px);
     }
     
-    .btn-deactivate {
-        background: linear-gradient(135deg, #ef4444, #dc2626);
+    .btn-delete {
+        background: #dc2626;
         box-shadow: 0 2px 5px rgba(220, 38, 38, 0.2);
     }
     
-    .btn-deactivate:hover {
-        background: linear-gradient(135deg, #dc2626, #b91c1c);
+    .btn-delete:hover {
+        background: #b91c1c;
         transform: translateY(-1px);
     }
 
@@ -322,6 +322,18 @@
         background: linear-gradient(135deg, #16a34a, #15803d);
         transform: translateY(-1px);
     }
+
+    .status-confirm-overlay { align-items: center; background: rgba(15, 23, 42, .58); backdrop-filter: blur(6px); display: none; inset: 0; justify-content: center; padding: 20px; position: fixed; z-index: 1200; }
+    .status-confirm-overlay.is-open { display: flex; }
+    .status-confirm-box { background: #fff; border-radius: 26px; box-shadow: 0 28px 70px rgba(15, 23, 42, .28); max-width: 430px; padding: 30px; text-align: center; width: 100%; }
+    .status-confirm-icon { align-items: center; background: #fff1f2; border-radius: 50%; color: #e11d48; display: inline-flex; font-size: 1.55rem; height: 62px; justify-content: center; margin-bottom: 17px; width: 62px; }
+    .status-confirm-box h3 { color: #172033; font-size: 1.25rem; margin: 0 0 9px; }
+    .status-confirm-box p { color: #64748b; font-size: .92rem; line-height: 1.55; margin: 0 0 24px; }
+    .status-confirm-actions { display: flex; gap: 10px; justify-content: center; }
+    .status-confirm-actions button { border: 0; border-radius: 10px; cursor: pointer; font: inherit; font-weight: 700; min-width: 110px; padding: 11px 17px; }
+    .status-cancel { background: #f1f5f9; color: #475569; }
+    .status-submit { background: #dc2626; color: #fff; }
+    .status-submit:hover { background: #b91c1c; }
 
     /* Modal styling overhauls */
     .modal-overlay {
@@ -680,14 +692,11 @@
                                         <span>Edit</span>
                                     </button>
 
-                                    <form method="POST" action="{{ route('admin.devices.destroy', $device->id) }}" style="margin: 0;" onsubmit="return confirm('{{ $device->is_active ? 'Deactivate' : 'Activate' }} this device?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn-action-small {{ $device->is_active ? 'btn-deactivate' : 'btn-activate' }}" title="{{ $device->is_active ? 'Deactivate Device' : 'Activate Device' }}">
-                                            <i class="bi {{ $device->is_active ? 'bi-pause-circle-fill' : 'bi-play-circle-fill' }}"></i>
-                                            <span>{{ $device->is_active ? 'Deactivate' : 'Activate' }}</span>
-                                        </button>
-                                    </form>
+                                    <button type="button" class="btn-action-small btn-delete" title="Delete Device"
+                                        onclick="openDeviceDeleteModal(@js(route('admin.devices.destroy', $device->id)), @js($device->name))">
+                                        <i class="bi bi-trash3-fill"></i>
+                                        <span>Delete</span>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -772,6 +781,22 @@
             </div>
         </form>
 
+    </div>
+</div>
+
+<div class="status-confirm-overlay" id="device-delete-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="device-delete-confirm-title" aria-hidden="true">
+    <div class="status-confirm-box">
+        <span class="status-confirm-icon"><i class="bi bi-trash3"></i></span>
+        <h3 id="device-delete-confirm-title">Delete device?</h3>
+        <p id="device-delete-confirm-message"></p>
+        <form id="deviceDeleteForm" method="POST">
+            @csrf
+            @method('DELETE')
+            <div class="status-confirm-actions">
+                <button class="status-cancel" type="button" onclick="closeDeviceDeleteModal()">Cancel</button>
+                <button class="status-submit" type="submit">Yes, delete</button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -860,6 +885,30 @@
         document.getElementById('capacity').value = '';
         document.getElementById('capacity_unit').value = '';
     }
+
+    function openDeviceDeleteModal(action, deviceName) {
+        const modal = document.getElementById('device-delete-confirm-modal');
+        document.getElementById('deviceDeleteForm').action = action;
+        document.getElementById('device-delete-confirm-message').innerText = `The device “${deviceName}” will be permanently deleted.`;
+        modal.classList.add('is-open');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeDeviceDeleteModal() {
+        const modal = document.getElementById('device-delete-confirm-modal');
+        modal.classList.remove('is-open');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+    }
+
+    document.getElementById('device-delete-confirm-modal').addEventListener('click', function (event) {
+        if (event.target === this) closeDeviceDeleteModal();
+    });
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') closeDeviceDeleteModal();
+    });
 </script>
 
 @endsection

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Customer;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\User;
+use App\Services\CloudinaryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -73,23 +74,35 @@ class DashboardController extends Controller
         return view('customer.account', compact('user'));
     }
 
-    public function updateProfile(Request $request)
+    public function updateProfile(Request $request, CloudinaryService $cloudinary)
     {
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . Auth::id(),
             'phone_number' => ['required', 'string', 'regex:/^[0-9]{1,11}$/'],
+            'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ], [
             'phone_number.regex' => 'The phone number must be between 1 and 11 digits and contain only numbers.',
+            'profile_image.max' => 'The profile picture must not be larger than 2 MB.',
         ]);
 
         /** @var User $user */
         $user = Auth::user();
-        $user->update([
+        $profileData = [
             'name' => $request->name,
             'email' => $request->email,
             'phone_number' => $request->phone_number,
-        ]);
+        ];
+
+        if ($request->hasFile('profile_image')) {
+            $profileData['profile_image'] = $cloudinary->upload(
+                $request->file('profile_image'),
+                config('services.cloudinary.profile_folder'),
+                'customer-'.$user->id
+            );
+        }
+
+        $user->update($profileData);
 
         return redirect()->route('customer.account')
             ->with('success', 'Profile updated successfully.');
@@ -118,5 +131,19 @@ class DashboardController extends Controller
 
         return redirect()->route('customer.account')
             ->with('success', 'Password updated successfully.');
+    }
+
+    public function toggleStatus()
+    {
+        /** @var User $user */
+        $user = Auth::user();
+        $user->update(['is_active' => ! $user->is_active]);
+
+        return redirect()->route('customer.account')->with(
+            'success',
+            $user->is_active
+                ? 'Your account has been activated successfully.'
+                : 'Your account has been deactivated. You can reactivate it before signing out.'
+        );
     }
 }

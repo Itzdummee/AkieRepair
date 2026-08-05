@@ -635,38 +635,38 @@
 
                         <label><i class="bi bi-tools"></i> Assign Technician</label>
 
+                        @php
+                            $availableTechnicians = $technicians->filter(function ($technician) use ($booking) {
+                                $isUnavailable = $technician->availabilities
+                                    ->contains(function ($availability) use ($booking) {
+                                        return $booking->visit_date && $availability->isUnavailableOn($booking->visit_date);
+                                    });
+
+                                $deviceType = $booking->device->type ?? null;
+                                $isSpecialized = true;
+
+                                if ($deviceType) {
+                                    $specialties = array_map('trim', explode(',', strtolower($technician->specialty ?? '')));
+                                    $isSpecialized = collect($specialties)
+                                        ->contains(fn ($specialty) => str_contains($specialty, strtolower($deviceType)));
+                                }
+
+                                return ! $isUnavailable && $isSpecialized;
+                            });
+
+                            // The controller orders this collection by active repair count, then name and ID.
+                            $recommendedTechnicianId = $availableTechnicians->first()?->id;
+                            $selectedTechnicianId = old('technician_id', $booking->technician_id ?: $recommendedTechnicianId);
+                        @endphp
+
                         <select name="technician_id" class="pending-select" required>
                             <option value="">Select available technician</option>
 
-                            @foreach($technicians as $technician)
-                                @php
-                                    $isUnavailable = $technician->availabilities
-                                        ->contains(function ($availability) use ($booking) {
-                                            return $booking->visit_date && $availability->isUnavailableOn($booking->visit_date);
-                                        });
-
-                                    $deviceType = $booking->device->type ?? null;
-                                    $isSpecialized = true;
-
-                                    if ($deviceType) {
-                                        $specialties = array_map('trim', explode(',', strtolower($technician->specialty ?? '')));
-                                        $isSpecialized = false;
-
-                                        foreach ($specialties as $specialty) {
-                                            if (str_contains($specialty, strtolower($deviceType))) {
-                                                $isSpecialized = true;
-                                                break;
-                                            }
-                                        }
-                                    }
-                                @endphp
-
-                                @if(!$isUnavailable && $isSpecialized)
-                                    <option value="{{ $technician->id }}"
-                                        {{ $booking->technician_id == $technician->id ? 'selected' : '' }}>
-                                        {{ $technician->name }}
-                                    </option>
-                                @endif
+                            @foreach($availableTechnicians as $technician)
+                                <option value="{{ $technician->id }}"
+                                    {{ (string) $selectedTechnicianId === (string) $technician->id ? 'selected' : '' }}>
+                                    {{ $technician->name }}
+                                </option>
                             @endforeach
                         </select>
 

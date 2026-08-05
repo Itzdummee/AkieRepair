@@ -317,6 +317,19 @@
     .modal-overlay:not(.hide) .modal-box {
         transform: scale(1);
     }
+
+    .status-confirm-overlay { align-items: center; background: rgba(15, 23, 42, .58); backdrop-filter: blur(6px); display: none; inset: 0; justify-content: center; padding: 20px; position: fixed; z-index: 1200; }
+    .status-confirm-overlay.is-open { display: flex; }
+    .status-confirm-box { background: #fff; border-radius: 26px; box-shadow: 0 28px 70px rgba(15, 23, 42, .28); max-width: 430px; padding: 30px; text-align: center; width: 100%; }
+    .status-confirm-icon { align-items: center; background: #fff1f2; border-radius: 50%; color: #e11d48; display: inline-flex; font-size: 1.55rem; height: 62px; justify-content: center; margin-bottom: 17px; width: 62px; }
+    .status-confirm-box.is-activate .status-confirm-icon { background: #ecfdf5; color: #059669; }
+    .status-confirm-box h3 { color: #172033; font-size: 1.25rem; margin: 0 0 9px; }
+    .status-confirm-box p { color: #64748b; font-size: .92rem; line-height: 1.55; margin: 0 0 24px; }
+    .status-confirm-actions { display: flex; gap: 10px; justify-content: center; }
+    .status-confirm-actions button { border: 0; border-radius: 10px; cursor: pointer; font: inherit; font-weight: 700; min-width: 110px; padding: 11px 17px; }
+    .status-cancel { background: #f1f5f9; color: #334155; }
+    .status-submit { background: #e11d48; color: #fff; }
+    .status-confirm-box.is-activate .status-submit { background: #059669; }
     
     .modal-header {
         display: flex;
@@ -836,13 +849,12 @@
                                                 <i class="bi bi-pencil-square"></i>
                                             </button>
 
-                                            <form method="POST" action="{{ route('admin.repairs.destroy', $repair->id) }}" style="margin: 0;" onsubmit="return confirm('{{ $repair->is_active ? 'Deactivate' : 'Activate' }} this repair pricing record?')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn-action-icon btn-delete" title="{{ $repair->is_active ? 'Deactivate Repair Pricing' : 'Activate Repair Pricing' }}">
+                                            <div style="margin: 0;">
+                                                <button type="button" class="btn-action-icon btn-delete" title="{{ $repair->is_active ? 'Deactivate Repair Pricing' : 'Activate Repair Pricing' }}"
+                                                    onclick="openRepairStatusModal(@js(route('admin.repairs.destroy', $repair->id)), @js($repair->repair_type), {{ $repair->is_active ? 'true' : 'false' }})">
                                                     <i class="bi {{ $repair->is_active ? 'bi-pause-circle-fill' : 'bi-play-circle-fill' }}"></i>
                                                 </button>
-                                            </form>
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>
@@ -893,7 +905,7 @@
         <div class="modal-header">
             <div>
                 <span class="status-badge-pill badge-phone" style="font-size: 10px; margin-bottom: 6px;">Pricing Rule</span>
-                <h3 class="modal-title" id="repairModalTitle">Add Repair pricing</h3>
+                <h3 class="modal-title" id="repairModalTitle">Add Repair</h3>
             </div>
             <button type="button" class="modal-close" onclick="closeRepairModal()">
                 <i class="bi bi-x"></i>
@@ -975,6 +987,22 @@
             <div class="form-actions">
                 <button type="button" class="btn-modal btn-modal-cancel" onclick="closeRepairModal()">Cancel</button>
                 <button type="submit" class="btn-modal btn-modal-submit" id="repairSubmitBtn">Add Pricing</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="status-confirm-overlay" id="repair-status-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="repair-status-confirm-title" aria-hidden="true">
+    <div class="status-confirm-box" id="repair-status-confirm-box">
+        <span class="status-confirm-icon"><i class="bi bi-pause-circle" id="repair-status-confirm-icon"></i></span>
+        <h3 id="repair-status-confirm-title">Deactivate repair?</h3>
+        <p id="repair-status-confirm-message"></p>
+        <form id="repairStatusForm" method="POST">
+            @csrf
+            @method('DELETE')
+            <div class="status-confirm-actions">
+                <button class="status-cancel" type="button" onclick="closeRepairStatusModal()">Cancel</button>
+                <button class="status-submit" id="repair-status-confirm-submit" type="submit">Yes, deactivate</button>
             </div>
         </form>
     </div>
@@ -1062,7 +1090,7 @@
 
     function openRepairEditModal(id, serviceId, deviceId, repairType, price, warranty, duration, desc, image) {
         document.getElementById('repairModal').classList.remove('hide');
-        document.getElementById('repairModalTitle').innerText = 'Update Pricing Rule';
+        document.getElementById('repairModalTitle').innerText = 'Update Repair';
         document.getElementById('repairSubmitBtn').innerText = 'Save Changes';
 
         document.getElementById('rep_service_id').value = serviceId ?? '';
@@ -1083,8 +1111,8 @@
     }
 
     function resetRepairForm() {
-        document.getElementById('repairModalTitle').innerText = 'Add Repair Pricing';
-        document.getElementById('repairSubmitBtn').innerText = 'Add Pricing';
+        document.getElementById('repairModalTitle').innerText = 'Add Repair';
+        document.getElementById('repairSubmitBtn').innerText = 'Add Repair';
 
         document.getElementById('repairForm').action = '{{ route('admin.repairs.store') }}';
         document.getElementById('repairMethodField').value = 'POST';
@@ -1098,6 +1126,39 @@
         document.getElementById('rep_desc').value = '';
         document.getElementById('rep_image').value = '';
     }
+
+    function openRepairStatusModal(action, repairType, isActive) {
+        const modal = document.getElementById('repair-status-confirm-modal');
+        const box = document.getElementById('repair-status-confirm-box');
+        const actionLabel = isActive ? 'deactivate' : 'activate';
+
+        document.getElementById('repairStatusForm').action = action;
+        document.getElementById('repair-status-confirm-title').innerText = `${isActive ? 'Deactivate' : 'Activate'} repair?`;
+        document.getElementById('repair-status-confirm-message').innerText = isActive
+            ? `The pricing record for “${repairType}” will no longer be available for new repair bookings.`
+            : `The pricing record for “${repairType}” will become available for repair bookings again.`;
+        document.getElementById('repair-status-confirm-submit').innerText = `Yes, ${actionLabel}`;
+        document.getElementById('repair-status-confirm-icon').className = `bi ${isActive ? 'bi-pause-circle' : 'bi-play-circle'}`;
+        box.classList.toggle('is-activate', !isActive);
+        modal.classList.add('is-open');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeRepairStatusModal() {
+        const modal = document.getElementById('repair-status-confirm-modal');
+        modal.classList.remove('is-open');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+    }
+
+    document.getElementById('repair-status-confirm-modal').addEventListener('click', function (event) {
+        if (event.target === this) closeRepairStatusModal();
+    });
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') closeRepairStatusModal();
+    });
 </script>
 
 @endsection

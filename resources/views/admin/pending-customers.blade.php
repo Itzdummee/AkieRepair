@@ -211,13 +211,13 @@
         transform: translateY(-1px);
     }
     
-    .btn-reject {
-        background: linear-gradient(135deg, #f43f5e, #e11d48);
+    .pending-cust-container .btn-reject {
+        background: linear-gradient(135deg, #f43f5e, #e11d48) !important;
         box-shadow: 0 2px 5px rgba(244, 63, 94, 0.15);
     }
     
-    .btn-reject:hover {
-        background: linear-gradient(135deg, #e11d48, #be123c);
+    .pending-cust-container .btn-reject:hover {
+        background: linear-gradient(135deg, #e11d48, #be123c) !important;
         transform: translateY(-1px);
     }
 
